@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -28,7 +26,7 @@ namespace Rusty_Client.Pages
         {
             Status = await httpClientFactory.CreateClient().GetFromJsonAsync<GameStatus>($"{ config["GameServer"]}/status");
             rows = Status.Board.Max(r => r.Location.Row);
-            columns = Status.Board.Max(c => c.Location.Column);
+            columns = Status.Board.Max(r => r.Location.Column);
         }
 
         public async Task<IActionResult> OnPostStartGameAsync()
