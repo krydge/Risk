@@ -85,7 +85,7 @@ namespace Emmanuel_Client.Controllers
             //This logic will not grab a neighbour of the territory.
             foreach (var ter in beginAttack.Board)
             {
-                if (!(ter.OwnerName is null) && ter.OwnerName == "Emmanuel")
+                if (!(ter.OwnerName is null) && ter.OwnerName == "Emmanuel" && ter.Armies > 1)
                 {
                     from = ter.Location;
                     for (int i = ter.Location.Column - 1; i <= ter.Location.Column + 1; i++)
