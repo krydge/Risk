@@ -1,0 +1,41 @@
+﻿@page "/GameStatus"
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model Risk.HMClient.Pages.GameStatusModel
+@{
+    int playerCount = 1;
+}
+
+<head>
+    <meta http-equiv="refresh" content="5">
+</head>
+
+<h3>Game State: @Model.Status.GameState</h3>
+
+@if (@Model.Status.GameState == Risk.Shared.GameState.Joining)
+{
+    <form method="post" asp-page-handler="StartGame">
+        <input type="text" name="server" value="@Model.ServerName" />
+        <input type="text" name="secretCode" value="HectoritoBonito" />
+        <button type="submit">Start Game</button>
+    </form>
+}
+
+<table cellpadding="5px">
+    <tr>
+        <th>Player</th>
+        <th>Territories</th>
+        <th>Armies</th>
+        <th>Score</th>
+    </tr>
+    @foreach (var player in Model.Status.PlayerStats)
+    {
+        <tr>
+            <td>@player.Name</td>
+            <td align="right">@player.Territories</td>
+            <td align="right">@player.Armies</td>
+            <td align="right">@player.Score</td>
+        </tr>
+    }
+</table>
+
+

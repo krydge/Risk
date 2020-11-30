@@ -18,6 +18,8 @@
     "HMClient": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "Index",
+      "applicationUrl": "http://144.17.48.41:5320;http://144.17.48.41:5321",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
