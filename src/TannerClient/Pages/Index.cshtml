@@ -1,0 +1,32 @@
+﻿@page "/index"
+@model TannerClient.Pages.IndexModel
+@{
+}
+
+<h2>Game State: @Model.Status.GameState</h2>
+@if (@Model.Status.GameState == Risk.Shared.GameState.Joining)
+{
+    <form method="post" asp-page-handler="StartGame">
+        <input type="text" name="server" value="http://144.17.48.37:5000" />
+        <input type="text" name="secretCode" value="BazookaJoe" />
+        <button type="submit">Start Game</button>
+    </form>
+}
+
+<table>
+    <tr>
+        <th>Location</th>
+        <th>Armies</th>
+        <th>Player Name</th>
+        <th>Score</th>
+    </tr>
+    @foreach (var territory in Model.Status.Board)
+    {
+        <tr>
+            <td>@territory.Location</td>
+            <td>@territory.Armies</td>
+            <td>@territory.OwnerName</td>
+            <td></td> @{/*Need to add score calculation here (Can't remember how the score is calculated*/ }
+        </tr>
+    }
+</table>
