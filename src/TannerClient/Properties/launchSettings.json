@@ -31,11 +31,8 @@
       "launchBrowser": true,
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/weatherforecast",
       "publishAllPorts": true,
-      "useSSL": true,
-      "ASPNETCORE_ENVIRONMENT": "Development",
-      "GameServer": "http://144.17.48.37:5000",
-      "ClientCallBackAddress": "http://144.17.118.92",
-      "PlayerName": "Tanner"
+      "useSSL": false,
+      "ASPNETCORE_ENVIRONMENT": "Development"
     }
   }
 }

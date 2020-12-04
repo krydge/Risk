@@ -90,22 +90,23 @@ services:
     - risk.api
 
 
-#  tannerclient:
-#    hostname: tannerclient
-#    image: ${DOCKER_REGISTRY-}tannerclient
-#    build:
-#      context: .
-#      dockerfile: TannerClient/Dockerfile
-#    ports:
-#    - "5025:80"
-#    environment:
-#    - GameServer=http://risk.api
-#    - ClientCallbackAddress=http://tannerclient
-#    - PlayerName=tanner
-#    networks:
-#      risknet:
-#    depends_on:
-#    - risk.api
+  tannerclient:
+    hostname: tannerclient
+    image: ${DOCKER_REGISTRY-}tannerclient
+    build:
+      context: .
+      dockerfile: TannerClient/Dockerfile
+    ports:
+    - "5025:80"
+    environment:
+    - GameServer=http://risk.api
+    - ClientCallbackAddress=http://tannerclient
+    - PlayerName=tanner
+    - secretCode=banana
+    networks:
+      risknet:
+    depends_on:
+    - risk.api
 
   wyattclient:
     hostname: wyattclient

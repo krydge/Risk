@@ -34,6 +34,7 @@ namespace TannerClient
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddRazorPages();
             services.AddHttpClient();
             services.AddSingleton<IPlayer>(new ClientPlayer { Name = "Tanner" });
         }
@@ -54,10 +55,11 @@ namespace TannerClient
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
 
 
-            var server = Configuration["ServerName"];
+            var server = Configuration["GameServer"];
             var httpClient = httpClientFactory.CreateClient();
             //var clientBaseAddress = app.ServerFeatures.Get<IServerAddressesFeature>().Addresses.First();
             var clientBaseAddress = Configuration["ClientCallbackAddress"];

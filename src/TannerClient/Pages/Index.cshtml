@@ -1,16 +1,17 @@
-﻿@page "/index"
+﻿@page "/"
 @model TannerClient.Pages.IndexModel
-@{
-}
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
 <h2>Game State: @Model.Status.GameState</h2>
 @if (@Model.Status.GameState == Risk.Shared.GameState.Joining)
 {
     <form method="post" asp-page-handler="StartGame">
-        <input type="text" name="server" value="http://144.17.48.37:5000" />
-        <input type="text" name="secretCode" value="BazookaJoe" />
         <button type="submit">Start Game</button>
     </form>
+    <form method="post" action="http://localhost:5025/index?pagehandler=StartGame">
+        <button type="submit">Start Game</button>
+    </form>
+
 }
 
 <table>

@@ -68,7 +68,7 @@ namespace TannerClient.Controllers
             return gamePlayer.DecideBeginAttack(beginAttackRequest);
         }
 
-        [HttpPost("continueAttack")]
+        [HttpPost("continueAttacking")]
         public ContinueAttackResponse ContinueAttack([FromBody] ContinueAttackRequest continueAttackRequest)
         {
             return gamePlayer.DecideContinueAttackResponse(continueAttackRequest);

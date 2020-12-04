@@ -50,14 +50,14 @@ services:
     volumes:
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
- # tannerclient:
- #   environment:
- #     - ASPNETCORE_ENVIRONMENT=Development
- #     - ASPNETCORE_URLS=http://+:80
- #   ports:
- #     - "80"
- #   volumes:
- #     - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+  tannerclient:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "80"
+    volumes:
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
   wyattclient:
     environment:

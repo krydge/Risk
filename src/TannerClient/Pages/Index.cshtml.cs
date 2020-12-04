@@ -25,8 +25,6 @@ namespace TannerClient.Pages
         public GameStatus Status { get; set; }
         public int rows { get; set; }
         public int columns { get; set; }
-        public string ServerName { get; set; }
-
 
         public async Task OnGet()
         {
@@ -35,11 +33,10 @@ namespace TannerClient.Pages
             columns = Status.Board.Max(c => c.Location.Column);
         }
 
-        public async Task<IActionResult> OnPostStartGameAsync(string server, string secretCode)
+        public async Task<IActionResult> OnPostStartGameAsync()
         {
             var client = httpClientFactory.CreateClient();
-            await client.PostAsJsonAsync($"{server}/startgame", new StartGameRequest { SecretCode = secretCode });
-            ServerName = server;
+            await client.PostAsJsonAsync($"{config["GameServer"]}/startgame", new StartGameRequest { SecretCode = config["secretCode"]});     
             return new RedirectToPageResult("Index");
         }
     }
