@@ -36,8 +36,10 @@ namespace TannerClient.Pages
         public async Task<IActionResult> OnPostStartGameAsync()
         {
             var client = httpClientFactory.CreateClient();
-            await client.PostAsJsonAsync($"{config["GameServer"]}/startgame", new StartGameRequest { SecretCode = config["secretCode"]});     
-            return new RedirectToPageResult("Index");
+            await Task.Run(() =>
+                client.PostAsJsonAsync($"{config["GameServer"]}/startgame", new StartGameRequest { SecretCode = config["secretCode"] })
+            );
+            return new RedirectToPageResult("");
         }
     }
 }

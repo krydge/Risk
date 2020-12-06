@@ -8,26 +8,33 @@
     <form method="post" asp-page-handler="StartGame">
         <button type="submit">Start Game</button>
     </form>
-    <form method="post" action="http://localhost:5025/index?pagehandler=StartGame">
-        <button type="submit">Start Game</button>
-    </form>
-
 }
 
-<table>
-    <tr>
-        <th>Location</th>
-        <th>Armies</th>
-        <th>Player Name</th>
-        <th>Score</th>
-    </tr>
-    @foreach (var territory in Model.Status.Board)
-    {
-        <tr>
-            <td>@territory.Location</td>
-            <td>@territory.Armies</td>
-            <td>@territory.OwnerName</td>
-            <td></td> @{/*Need to add score calculation here (Can't remember how the score is calculated*/ }
+@if(Model.Status.GameState == Risk.Shared.GameState.GameOver)
+{
+    <form method="post" asp-page-handler="RestartGame">
+        <button type="submit">Restart</button>
+    </form>
+}
+
+<div class="playerStats">
+    <table>
+        <thead>
+        <td>Player Name</td>
+        <td>Territories</td>
+        <td>Armies</td>
+        <td>Score</td>
         </tr>
-    }
-</table>
+        @foreach (var p in Model.Status.PlayerStats.OrderByDescending(p => p.Score))
+        {
+            <tr>
+                <td>@p.Name</td>
+                <td>@p.Territories</td>
+                <td>@p.Armies</td>
+                <td>@p.Score</td>
+            </tr>
+        }
+    </table>
+</div>
+
+

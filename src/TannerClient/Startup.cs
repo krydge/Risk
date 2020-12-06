@@ -36,7 +36,7 @@ namespace TannerClient
             services.AddControllers();
             services.AddRazorPages();
             services.AddHttpClient();
-            services.AddSingleton<IPlayer>(new ClientPlayer { Name = "Tanner" });
+            services.AddSingleton<IPlayer>(new ClientPlayer { Name = "tanner" });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
