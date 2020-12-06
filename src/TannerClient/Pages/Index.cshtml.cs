@@ -39,7 +39,7 @@ namespace TannerClient.Pages
             await Task.Run(() =>
                 client.PostAsJsonAsync($"{config["GameServer"]}/startgame", new StartGameRequest { SecretCode = config["secretCode"] })
             );
-            return new RedirectToPageResult("");
+            return new RedirectToPageResult("Index");
         }
     }
 }
