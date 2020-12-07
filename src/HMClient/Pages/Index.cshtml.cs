@@ -26,7 +26,7 @@ namespace Risk.HMClient.Pages
         //    return "Submit a get request to /joinServer/{serverAddress} to join a game.";
         //}
 
-        [HttpGet]
+        [HttpGet("joinServer/{*server}")]
         public async Task<IActionResult> JoinAsync_Get(string server)
         {
             var client = httpClientFactory.CreateClient();
@@ -47,7 +47,7 @@ namespace Risk.HMClient.Pages
             }
         }
 
-        [HttpPost]
+        [HttpPost("joinServer")]
         public async Task<IActionResult> JoinAsync_Post(string server)
         {
             await JoinAsync_Get(server);

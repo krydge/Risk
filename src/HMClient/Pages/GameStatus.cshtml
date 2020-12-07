@@ -1,4 +1,6 @@
 ﻿@page "/GameStatus"
+@using Risk.Shared
+@using System.Collections.Generic
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model Risk.HMClient.Pages.GameStatusModel
 @{
@@ -27,7 +29,7 @@
         <th>Armies</th>
         <th>Score</th>
     </tr>
-    @foreach (var player in Model.Status.PlayerStats)
+    @foreach (var player in Model.Status.PlayerStats.OrderByDescending(p => p.Score))
     {
         <tr>
             <td>@player.Name</td>
@@ -37,5 +39,30 @@
         </tr>
     }
 </table>
+
+<div class="grid-container">
+    @{
+
+    }
+    <table border="1px" cellpadding="10px">
+        @for (var row = 0; row <= 7; row++)
+        {
+            <tr>
+                @for (var col = 0; col <= 7; col++)
+                {
+                    <td class="cell">
+                        @{
+                            var cell = Model.Status.Board.First(t => t.Location == new Location(row, col));
+                        }
+                        <div class="location">@cell.Location</div>
+                        <div class="armies">@cell.Armies</div>
+                        <div class="name">@cell.OwnerName</div>
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+</div>
+
 
 

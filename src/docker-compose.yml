@@ -176,22 +176,22 @@ services:
     depends_on:
     - risk.api
 
-#  hmclient:
-#    hostname: hmclient
-#    image: ${DOCKER_REGISTRY-}hmclient
-#    build:
-#      context: .
-#      dockerfile: HMClient/Dockerfile
-#    ports:
-#    - "5050:80"
-#    environment:
-#    - GameServer=http://risk.api
-#    - ClientCallbackAddress=http://hmclient
-#    - PlayerName=Hector
-#    networks:
-#      risknet:
-#    depends_on:
-#    - risk.api
+  hmclient:
+    hostname: hmclient
+    image: ${DOCKER_REGISTRY-}hmclient
+    build:
+      context: .
+      dockerfile: HMClient/Dockerfile
+    ports:
+    - "5050:80"
+    environment:
+    - GameServer=http://risk.api
+    - ClientCallbackAddress=http://hmclient
+    - PlayerName=HectoritoBonito
+    networks:
+      risknet:
+    depends_on:
+    - risk.api
 
   rusty_client:
     hostname: rusty_client
