@@ -141,7 +141,7 @@ namespace Rusty_Client.Controllers
                     
                 }
             }
-            return null;
+            throw new Exception("No valid attack");
         }
 
         [HttpPost("continueAttacking")]

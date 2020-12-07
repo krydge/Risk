@@ -32,6 +32,7 @@ namespace Emmanuel_Client
         {
             services.AddControllers();
             services.AddHttpClient();
+            services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,6 +52,7 @@ namespace Emmanuel_Client
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
 
             //var server = Configuration["ServerName"];

@@ -1,0 +1,71 @@
+﻿@page "/watch"
+@using Risk.Shared
+@using System.Collections.Generic
+@model WyattClient.Pages.VisualizeModel 
+@{
+}
+<meta http-equiv="refresh" content="1">
+<style>
+.location{
+    font-size: 10pt;
+    width: 48%;
+    float: left;
+}
+.name {
+    font-size: 14pt;
+    color: green
+}
+.armies {
+    color: blue;
+    font-weight: bold;
+    width: 48%;
+    float: right;
+    text-align: right;
+}
+</style>
+
+<h2 style="color: red">@Model.Status.GameState</h2>
+
+<div class="playerStats">
+    <table cellpadding="10px,2px">
+        <thead>
+            <td style="font-weight: bold">Player Name</td>
+            <td style="font-weight: bold">Territories</td>
+            <td style="font-weight: bold">Armies</td>
+            <td style="font-weight: bold">Score</td>
+        </tr>
+        @foreach (var p in Model.Status.PlayerStats.OrderByDescending(i => i.Score))
+        {
+        <tr>
+            <td>@p.Name</td>
+            <td style="color: green">@p.Territories</td>
+            <td style="color: blue">@p.Armies</td>
+            <td style="color: red">@p.Score</td>
+        </tr>
+        }
+    </table>
+</div>
+
+<div class="grid-container">
+    @{
+
+    }
+    <table border="1px" cellpadding="10px">
+        @for (var row = 0; row <= Model.MaxRow; row++)
+        {
+        <tr>
+            @for (var col = 0; col <= Model.MaxCol; col++)
+            {
+            <td class="cell">
+                @{
+                    var cell = Model.Status.Board.First(t => t.Location == new Location(row, col));
+                }
+                <div class="location">@cell.Location</div>
+                <div class="armies">@cell.Armies</div>
+                <div class="name">@cell.OwnerName</div>
+            </td>
+            }
+        </tr>
+        }
+    </table>
+</div>
