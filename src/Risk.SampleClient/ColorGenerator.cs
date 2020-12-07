@@ -12,17 +12,6 @@ namespace Risk.SampleClient
         }
 
         Queue<string> palette = new Queue<string>(new []{
-            "#0066FF",
-            "#00FFFF",
-            "#3399FF",
-            "#33FFFF",
-            "#9900FF",
-            "#9966FF",
-            "#9999FF",
-            "#99FFFF",
-            "#CC33FF",
-            "#CCFFFF",
-            "#FFCCFF",
             "#FFFFFF",
             "#FFE6E6",
             "#4682B4",
@@ -36,6 +25,17 @@ namespace Risk.SampleClient
             "#FFAAAA",
             "#D46A6A",
             "#801515",
+            "#0066FF",
+            "#00FFFF",
+            "#3399FF",
+            "#33FFFF",
+            "#9900FF",
+            "#9966FF",
+            "#9999FF",
+            "#99FFFF",
+            "#CC33FF",
+            "#CCFFFF",
+            "#FFCCFF",
             "#550000"
         });
 
