@@ -87,6 +87,26 @@ namespace Risk.HMClient.Controllers
             return new DeployArmyResponse { DesiredLocation = attacklocation };
 
         }
+        [HttpPost("beginAction")]
+        public ActionResponse BeginAction ([FromBody] ActionRequest actionRequest)
+        {
+            return createActionResponse(actionRequest);
+        }
+        private ActionResponse createActionResponse (ActionRequest actionRequest)
+        {
+            Random rnd = new Random();
+            ActionResponse response = new ActionResponse();
+            if (rnd.Next(1,3) == 1)
+            {
+                response.userAction = UserAction.Attack;
+            }
+            else
+            {
+                response.userAction = UserAction.Pacifism;
+            }
+            return response;
+
+        }
 
         [HttpPost("beginAttack")]
         public BeginAttackResponse BeginAttack([FromBody] BeginAttackRequest beginAttackRequest)
