@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option csharp_namespace = "Risk.gRPC";
+
+package greet;
+
+// The greeting service definition.
+service Greeter {
+  // Sends a greeting
+  rpc SayHello (HelloRequest) returns (HelloReply);
+  rpc Add(AddRequest) returns (AddReply);
+  rpc StreamingFromServer (StreamingRequest) returns (stream StreamingReply);
+  rpc StreamBothWays (stream StreamingRequest) returns (stream StreamingReply);
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  string name = 1;
+}
+
+// The response message containing the greetings.
+message HelloReply {
+  string message = 1;
+}
+
+message AddRequest {
+	int32 num1 = 1;
+	int32 num2 = 2;
+}
+
+message AddReply {
+	int32 answer=1;
+}
+
+message StreamingRequest {
+	string clientName=1;
+	int32 favoriteNumber=2;
+}
+
+message StreamingReply {
+	string currentTimestamp=1;
+	string message=2;
+	int32 secondsElapsed=3;
+}
