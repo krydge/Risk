@@ -21,5 +21,7 @@ namespace Risk.Api
         public string Name { get; private set; }
         public string Token { get; private set; }
         public HttpClient HttpClient { get; }
+
+        public List<int> TerritoryCards => throw new NotImplementedException();
     }
 }

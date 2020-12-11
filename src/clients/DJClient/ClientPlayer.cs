@@ -10,5 +10,7 @@ namespace DJClient
     {
         public string Name { get; set; }
         public string Token { get; set; }
+
+        public List<int> TerritoryCards => throw new NotImplementedException();
     }
 }

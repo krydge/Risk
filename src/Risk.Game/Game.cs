@@ -18,6 +18,8 @@ namespace Risk.Game
 
         private ConcurrentDictionary<string, IPlayer> playerDictionary;
         public IEnumerable<IPlayer> Players => playerDictionary.Values;
+
+        public int numberOfCardTurnIns = 1;
         public void AddPlayer(IPlayer newPlayer)
         {
             playerDictionary.TryAdd(newPlayer.Token, newPlayer);
@@ -219,7 +221,9 @@ namespace Risk.Game
             }
             if (defendingTerritory.Armies < 1)
             {
+                 
                 BattleWasWon(attackingTerritory, defendingTerritory);
+                AddOneTerritoryCard(attackingTerritory.Owner.TerritoryCards, defendingTerritory); // This is the Call to AddOneTerritoryCard()
                 return new TryAttackResult {
                     CanContinue = false,
                     AttackInvalid = false
@@ -227,6 +231,44 @@ namespace Risk.Game
             }
             return new TryAttackResult { CanContinue = attackingTerritory.Armies > 1, AttackInvalid = false };
         }
+        //This adds one Territory card with a Random integer value between 1 and 3. The call is located in the tryAttack win Condition. This also checks that the length of the territory card hand is less than 6.
+        public void AddOneTerritoryCard(List<int> territoryCards, Territory defendingTerritory)
+        {
+            Random rnd = new Random();
+            int cardNumber = rnd.Next(1, 4);
+            if (territoryCards.Count() < 6)
+            {
+                territoryCards.Add(cardNumber);
+            }
+
+            if(territoryCards.Count > 2)
+            {
+                CheckCards(territoryCards, defendingTerritory);
+            }
+        }
+
+        //This Function Checks the deck for one of each card, or three of a kind.
+        public void CheckCards(List<int> Cards, Territory territory)
+        {
+            Cards.Sort();
+            int x = 0;
+            int numberOfArmies;
+            while (x > Cards.Count - 2)
+            {
+                if (Cards[x] == Cards[x + 1] && Cards[x + 2] == Cards[x + 1])
+                {
+                    territory.Armies = territory.Armies + (numberOfCardTurnIns * 5);
+                    numberOfCardTurnIns++;
+                }
+                else if (Cards[x]+1 == Cards[x + 1] && Cards[x + 1]+1 == Cards[x+2])
+                {
+                    territory.Armies+= (numberOfCardTurnIns * 5);
+                }
+            }
+           
+        }
+
+       
 
         private bool canAttack(string attackerToken, Territory attackingTerritory, Territory defendingTerritory)
         {

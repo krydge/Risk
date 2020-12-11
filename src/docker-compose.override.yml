@@ -23,13 +23,13 @@ services:
     volumes:
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
 
- # justin_client:
- #   environment:
- #     - ASPNETCORE_ENVIRONMENT=Development
- #   ports:
- #     - "80"
- #   volumes:
- #     - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+  justin_client:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "80"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
 
 #  kaydonsclient:
 #    environment:

@@ -55,22 +55,22 @@ services:
     - risk.api
 
 
-#  justin_client:
-#    hostname: justin_client
-#    image: ${DOCKER_REGISTRY-}justinclient
-#    build:
-#      context: .
-#      dockerfile: clients/Justins_Client/Justin_Client/Dockerfile
-#    ports:
-#    - "5015:80"
-#    environment:
-#    - GameServer=http://risk.api
-#    - ClientCallbackAddress=http://justin_client
-#    - PlayerName=Justin
-#    networks:
-#      risknet:
-#    depends_on:
-#    - risk.api
+  justin_client:
+    hostname: justin_client
+    image: ${DOCKER_REGISTRY-}justinclient
+    build:
+      context: .
+      dockerfile: clients/Justins_Client/Justin_Client/Dockerfile
+    ports:
+    - "5015:80"
+    environment:
+    - GameServer=http://risk.api
+    - ClientCallbackAddress=http://justin_client
+    - PlayerName=Justin
+    networks:
+        risknet:
+    depends_on:
+       - risk.api
 
   stuartclient:
     hostname: stuartclient
