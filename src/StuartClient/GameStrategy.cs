@@ -51,28 +51,36 @@ namespace StuartClient
             BeginAttackResponse beginAttack = new BeginAttackResponse();
             int max = 0;
             IEnumerable<BoardTerritory> neighbors = new List<BoardTerritory>();
-            foreach (var territory in attackRequest.Board)
-            {
-                if (!(territory.OwnerName == null))
-                {
-                    if (territory.OwnerName == "Stuart")
-                    {
-                        if (territory.Armies > max)
-                            max = territory.Armies;
-                    }
+            IEnumerable<BoardTerritory> myTerritories = GetMyTerritories(attackRequest.Board);
 
-                }
-            }
-            foreach (var territory in attackRequest.Board)
+
+            foreach (var territory in myTerritories)
             {
-                if (!(territory.OwnerName == null))
+                var myNeighbors = GetNeighbors(territory, attackRequest.Board);
+
+                foreach (var n in myNeighbors)
                 {
-                    if (territory.OwnerName == "Stuart" && territory.Armies == max)
+                    if (n.OwnerName != "Stuart")
+                    {
+                        beginAttack.To = n.Location;
+                        beginAttack.From = territory.Location;
+                    }
+                }
+                if (territory.Armies > max)
+                    max = territory.Armies;
+
+
+
+            }
+            foreach (var territory in myTerritories)
+            {
+                
+                    if ( territory.Armies == max)
                     {
                         beginAttack.From = territory.Location;
                         neighbors = GetNeighbors(territory, attackRequest.Board);
                     }
-                }
+                
             }
 
             foreach (var neighbor in neighbors)
@@ -92,6 +100,16 @@ namespace StuartClient
             }
             return beginAttack;
         }
+
+        //public bool PlayerCanAttack(IPlayer player)
+        //{
+        //    foreach (var territory in Board.Territories.Where(t => t.Owner == player && EnoughArmiesToAttack(t)))
+        //    {
+        //        var neighbors = Board.GetNeighbors(territory);
+        //        return neighbors.Any(n => n.Owner != player);
+        //    }
+        //    return false;
+        //}
 
         private IEnumerable<BoardTerritory> GetNeighbors(BoardTerritory territory, IEnumerable<BoardTerritory> territories)
         {
@@ -115,6 +133,18 @@ namespace StuartClient
             attackResponse.ContinueAttacking = (continueAttack.AttackingTerritorry.Armies > continueAttack.DefendingTerritorry.Armies);
             return attackResponse;
 
+        }
+        private IEnumerable<BoardTerritory> GetMyTerritories(IEnumerable<BoardTerritory> territories)
+        {
+            List<BoardTerritory> myTerritories = new List<BoardTerritory>();
+            foreach (BoardTerritory t in territories)
+            {
+                if (t.OwnerName != null && t.OwnerName == "Stuart")
+                {
+                    myTerritories.Add(t);
+                }
+            }
+            return myTerritories;
         }
     }
 }

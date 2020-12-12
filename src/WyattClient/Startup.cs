@@ -12,6 +12,7 @@ using Risk.Shared;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using System.Net.Http;
+using Westwind.AspNetCore.LiveReload;
 
 namespace WyattClient
 {
@@ -29,6 +30,8 @@ namespace WyattClient
         {
             services.AddControllers();
             services.AddHttpClient();
+            services.AddLiveReload();
+            services.AddRazorPages().AddRazorRuntimeCompilation();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,6 +40,7 @@ namespace WyattClient
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseLiveReload();
             }
             else
             {
@@ -55,6 +59,7 @@ namespace WyattClient
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
 
             var server = Configuration["ServerName"];
