@@ -259,10 +259,17 @@ namespace Risk.Game
                 {
                     territory.Armies = territory.Armies + (numberOfCardTurnIns * 5);
                     numberOfCardTurnIns++;
+                    Cards.Remove(Cards[x + 2]);
+                    Cards.Remove(Cards[x + 1]);
+                    Cards.Remove(Cards[x]);
                 }
-                else if (Cards[x]+1 == Cards[x + 1] && Cards[x + 1]+1 == Cards[x+2])
+                else if (Cards[x] + 1 == Cards[x + 1] && Cards[x + 1] + 1 == Cards[x + 2])
                 {
-                    territory.Armies+= (numberOfCardTurnIns * 5);
+                    territory.Armies += (numberOfCardTurnIns * 5);
+                    numberOfCardTurnIns++;
+                    Cards.Remove(Cards[x + 2]);
+                    Cards.Remove(Cards[x + 1]);
+                    Cards.Remove(Cards[x]);
                 }
                 x++;
             }
