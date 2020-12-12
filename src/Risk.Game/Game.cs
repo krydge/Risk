@@ -253,7 +253,7 @@ namespace Risk.Game
             Cards.Sort();
             int x = 0;
             int numberOfArmies;
-            while (x > Cards.Count - 2)
+            while (x < Cards.Count - 2)
             {
                 if (Cards[x] == Cards[x + 1] && Cards[x + 2] == Cards[x + 1])
                 {
@@ -264,6 +264,7 @@ namespace Risk.Game
                 {
                     territory.Armies+= (numberOfCardTurnIns * 5);
                 }
+                x++;
             }
            
         }

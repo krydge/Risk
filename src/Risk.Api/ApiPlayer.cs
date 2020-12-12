@@ -16,12 +16,13 @@ namespace Risk.Api
             Name = name;
             Token = token;
             HttpClient = httpClient;
+            TerritoryCards = new List<int>();
         }
 
         public string Name { get; private set; }
         public string Token { get; private set; }
         public HttpClient HttpClient { get; }
 
-        public List<int> TerritoryCards => throw new NotImplementedException();
+        public List<int> TerritoryCards { get; set; }
     }
 }

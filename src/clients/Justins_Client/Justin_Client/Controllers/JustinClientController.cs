@@ -62,7 +62,6 @@ namespace Justin_Client
             {
                 if(t.OwnerName == null)
                 {
-                    
                     response.DesiredLocation = t.Location;
                     return response;
                 }
@@ -76,7 +75,7 @@ namespace Justin_Client
                     response.DesiredLocation = t.Location;
                 } 
             }
-            throw new Exception("could not deploy army");
+            return response;
         }
 
         [HttpPost("beginAttack")]

@@ -7,6 +7,6 @@ namespace Risk.Shared
         public string Name { get; }
         public string Token { get; }
 
-        public List<int> TerritoryCards { get; }
+        public List<int> TerritoryCards { get; set; }
     }
 }
