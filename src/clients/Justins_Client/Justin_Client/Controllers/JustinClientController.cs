@@ -58,7 +58,23 @@ namespace Justin_Client
         public DeployArmyResponse DeployArmy([FromBody] DeployArmyRequest deployArmyRequest)
         {
             DeployArmyResponse response = new DeployArmyResponse();
-            response.DesiredLocation = new Location(1, 1);
+            foreach (var t  in deployArmyRequest.Board)
+            {
+                if(t.OwnerName == null)
+                {
+                    response.DesiredLocation = t.Location;
+                    return response;
+                }
+                
+            }
+          
+            foreach (var t in deployArmyRequest.Board)
+            {
+                if(t.OwnerName == "Justin")
+                {
+                    response.DesiredLocation = t.Location;
+                } 
+            }
             return response;
         }
 
@@ -66,12 +82,70 @@ namespace Justin_Client
         public BeginAttackResponse BeginAttack([FromBody] BeginAttackRequest beginAttackRequest)
         {
             BeginAttackResponse response = new BeginAttackResponse();
+
+            var myControlledTerritories = new List<Location>();
+            foreach (var myTerritory in beginAttackRequest.Board.Where(t => t.OwnerName == "Justin" && t.Armies > 1))
+            {
+                myControlledTerritories.Add(myTerritory.Location);
+            }
+
+            var enemyControlledTerritories = new List<Location>();
+            foreach (var enemyTerritory in beginAttackRequest.Board.Where(t => t.OwnerName != "Justin"))
+            {
+                enemyControlledTerritories.Add(enemyTerritory.Location);
+            }
+
+            var possibleAttackLocations = new List<Tuple<int, int>>();
+           foreach(var x in myControlledTerritories)
+            {
+                foreach (var y in enemyControlledTerritories)
+                {
+                    var isValidAttackLocation = isValidLocation(x, y);
+                   if (isValidAttackLocation.Item1 == true)
+                    {
+                       
+                    }
+                    
+                }
+            }
+
             response.From = new Location(1, 1);
             response.To = new Location(1, 2);
             return response;
         }
+        
 
-        [HttpPost("continueAttack")]
+        private Tuple<bool, int, int> isValidLocation(Location from, Location to)
+        {
+            
+            var columnCorrect = false;
+            if((to.Column == from.Column-1)||(to.Column == from.Column+1))
+            {
+                columnCorrect = true;
+            }
+
+            var rowCorrect = false;
+            if((to.Row == from.Row-1)||(to.Row == from.Row+1))
+            {
+                rowCorrect = true;
+            }
+            
+            if(rowCorrect == false && columnCorrect == false)
+            {
+                var tupleTrue = Tuple.Create(true,to.Row, to.Column);
+                return tupleTrue;
+            }
+            else
+            {
+                var tupleFalse = Tuple.Create(false, to.Row, to.Column);
+                return tupleFalse;
+            }
+
+        }
+      
+
+
+        [HttpPost("continueAttacking")]
         public ContinueAttackResponse ContinueAttack([FromBody] ContinueAttackRequest continueAttackRequest)
         {
             ContinueAttackResponse response = new ContinueAttackResponse();

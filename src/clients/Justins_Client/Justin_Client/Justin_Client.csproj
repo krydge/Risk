@@ -19,5 +19,9 @@
     <ProjectReference Include="..\..\..\Risk.Shared\Risk.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\" />
+  </ItemGroup>
+
 
 </Project>
