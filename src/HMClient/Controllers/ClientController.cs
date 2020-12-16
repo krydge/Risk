@@ -155,10 +155,22 @@ namespace Risk.HMClient.Controllers
         [HttpPost("continueAttacking")]
         public ContinueAttackResponse ContinueAttack([FromBody] ContinueAttackRequest continueAttackRequest)
         {
+            return createContinueAttackResponse(continueAttackRequest);
+        }
+        private ContinueAttackResponse createContinueAttackResponse(ContinueAttackRequest continueAttackRequest)
+        {
+            Random rnd = new Random();
             ContinueAttackResponse response = new ContinueAttackResponse();
-            response.ContinueAttacking = false;
-
+            if (rnd.Next(1, 3) == 1)
+            {
+                response.ContinueAttacking = false;
+            }
+            else
+            {
+                response.ContinueAttacking = true;
+            }
             return response;
+
         }
 
         [HttpPost("gameOver")]
