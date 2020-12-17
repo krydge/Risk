@@ -87,6 +87,9 @@ namespace Risk.HMClient.Controllers
             return new DeployArmyResponse { DesiredLocation = attacklocation };
 
         }
+
+
+        //The following two functions allow support for pacifism (choosen randomly might mess logic in your client)
         [HttpPost("beginAction")]
         public ActionResponse BeginAction ([FromBody] ActionRequest actionRequest)
         {
@@ -152,6 +155,7 @@ namespace Risk.HMClient.Controllers
             return null;
         }
 
+        //The following two functions allow support with continue attacking (choosen randomly might mess logic in your client)
         [HttpPost("continueAttacking")]
         public ContinueAttackResponse ContinueAttack([FromBody] ContinueAttackRequest continueAttackRequest)
         {
