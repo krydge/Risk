@@ -16,6 +16,8 @@ using Risk.Shared;
 using System.Net.Http.Json;
 using System.Net;
 using System.Net.Sockets;
+using Westwind.AspNetCore.LiveReload;
+
 
 namespace DJClient
 {
@@ -34,6 +36,8 @@ namespace DJClient
         {
             services.AddControllers();
             services.AddHttpClient();
+            services.AddLiveReload();
+            services.AddRazorPages();
             services.AddSingleton<IPlayer>(new ClientPlayer { Name="DJ"});
         }
 
@@ -43,8 +47,10 @@ namespace DJClient
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseLiveReload();
             }
 
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthorization();
@@ -52,6 +58,7 @@ namespace DJClient
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapRazorPages();
             });
 
             var server = Configuration["ServerName"];

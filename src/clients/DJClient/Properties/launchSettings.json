@@ -8,6 +8,7 @@
       "applicationUrl": "http://localhost:5002",
       "environmentVariables": {
         "PlayerName": "DJ",
+        "ServerName": "https://localhost:5001",
         "ClientCallbackAddress": "http://localhost:5002"
       }
     },
