@@ -1,0 +1,56 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+
+<h5>Send Message</h5>
+<div>
+    <span>Input:</span><input type="text" @bind="userInput" /><br />
+    <button @onclick="Signup">Signup</button>
+    <button @onclick="GameStatus">Get Status</button>
+    <button @onclick="StartGame">Start Game</button>
+    <button @onclick="Deploy">Try Deploy</button>
+</div>
+
+<h5>List of Messages</h5>
+<ul>
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+<textarea @b></textarea>
+
+
+@code{
+    private HubConnection hubConnection;
+    private List<string> messages = new List<string>();
+    private string userInput;
+    private string messageInput;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder().WithUrl("http://localhost:5000/riskhub").Build();
+        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+            var encodedMsg = $"{user}: {message}";
+            messages.Add(encodedMsg);
+            StateHasChanged();
+        });
+        hubConnection.On("DeployRequest", () =>
+        {
+        //logic here that decides where the best place to place army, probably want to give the board
+        Deploy();
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    Task Send() => hubConnection.SendAsync("SendMessage", userInput, messageInput);
+    Task Signup() => hubConnection.SendAsync("Signup", userInput);
+    Task GameStatus() => hubConnection.SendAsync("GetStatus");
+    Task StartGame() => hubConnection.SendAsync("StartGame", userInput);
+    Task Deploy() => hubConnection.SendAsync("DeployRequest", 100, 100);
+
+
+}

@@ -8,12 +8,20 @@ namespace Risk.Server
 {
     public class Player : IPlayer
     {
+        public Player(string conId, string nam)
+        {
+            this.ConnectionId = conId;
+            this.Name = nam;
+            Token = Guid.NewGuid().ToString();
+            TerritoryCards = new List<int>();
+        }
+
         public string ConnectionId { get; set; }
 
-        public string Name => throw new NotImplementedException();
+        public string Name { get; set; }
 
-        public string Token => throw new NotImplementedException();
+        public string Token { get; set; }
 
-        public List<int> TerritoryCards { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public List<int> TerritoryCards { get; set; }
     }
 }
