@@ -62,7 +62,7 @@ namespace Risk.Server.Hubs
                 game.StartGame();
                 return BroadCastMessage("The Game has started");   
             }
-            return Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "You a dum dum stop sending fake passwords");
+            return Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "Incorrect password");
         }
 
         public override Task OnConnectedAsync()
@@ -79,18 +79,18 @@ namespace Risk.Server.Hubs
             }
             else
             {
-                //logic that asks user to place again?
+                //Failed to place army, ask user again? or skip?
             }
         }
 
         public async void AttackRequest(Location from, Location to)
         {
-
+            //verify they can attack, if so roll for attack, if not ask user again or skip
         }
 
         public async void ContinueAttackRequest(Location from, Location to)
         {
-
+            //verify they are attacking where they say they are, if so, continue attacking, if not ask again or skip
         }
 
 
