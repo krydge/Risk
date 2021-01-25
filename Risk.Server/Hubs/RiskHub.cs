@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Risk.Game;
 using Microsoft.Extensions.Configuration;
+using Risk.Shared;
 
 namespace Risk.Server.Hubs
 {
@@ -70,9 +71,9 @@ namespace Risk.Server.Hubs
             return base.OnConnectedAsync();
         }
 
-        public async void DeployRequest(int row, int column)
+        public async void DeployRequest(Location l)
         {
-            if(game.TryPlaceArmy(players.First(p => p.ConnectionId == Context.ConnectionId).Token, new Shared.Location(row, column)))
+            if(game.TryPlaceArmy(players.First(p => p.ConnectionId == Context.ConnectionId).Token, l))
             {
                 return;
             }
@@ -80,6 +81,16 @@ namespace Risk.Server.Hubs
             {
                 //logic that asks user to place again?
             }
+        }
+
+        public async void AttackRequest(Location from, Location to)
+        {
+
+        }
+
+        public async void ContinueAttackRequest(Location from, Location to)
+        {
+
         }
 
 

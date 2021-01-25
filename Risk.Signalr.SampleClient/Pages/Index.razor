@@ -37,10 +37,10 @@
             messages.Add(encodedMsg);
             StateHasChanged();
         });
-        hubConnection.On("DeployRequest", () =>
+        hubConnection.On<Board>("DeployRequest", (board) =>
         {
-        //logic here that decides where the best place to place army, probably want to give the board
-        Deploy();
+            //logic here that decides where the best place to place army, probably want to give the board
+            Deploy();
         });
 
         await hubConnection.StartAsync();
@@ -50,7 +50,10 @@
     Task Signup() => hubConnection.SendAsync("Signup", userInput);
     Task GameStatus() => hubConnection.SendAsync("GetStatus");
     Task StartGame() => hubConnection.SendAsync("StartGame", userInput);
-    Task Deploy() => hubConnection.SendAsync("DeployRequest", 100, 100);
+    //(name of hub control, location of placing units)
+    Task Deploy() => hubConnection.SendAsync("DeployRequest", new Location() { Row = 1, Column=2});
+    //(name of hub control, (to), (from)
+    Task Attack() => hubConnection.SendAsync("AttackRequest", new Location() { Row = 1, Column = 2 }, new Location() { Row = 1, Column = 3 });
 
 
 }
