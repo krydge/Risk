@@ -4,19 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Risk.Server
+namespace Risk.Shared
 {
     public class Player : IPlayer
     {
         public Player(string conId, string nam)
         {
-            this.ConnectionId = conId;
             this.Name = nam;
-            Token = Guid.NewGuid().ToString();
+            Token = conId;
             TerritoryCards = new List<int>();
         }
 
-        public string ConnectionId { get; set; }
 
         public string Name { get; set; }
 

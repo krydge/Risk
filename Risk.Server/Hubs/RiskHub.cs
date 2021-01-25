@@ -12,18 +12,15 @@ namespace Risk.Server.Hubs
 {
     public class RiskHub : Hub
     {
-        private List<Player> players { get; set; }
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
 
         private Risk.Game.Game game { get; set; }
-        public RiskHub(ILogger<RiskHub> logger, IConfiguration config)
+        public RiskHub(ILogger<RiskHub> logger, IConfiguration config, Game.Game game)
         {
             this.logger = logger;
             this.config = config;
-            players = new List<Player>();
-            game = new Game.Game(new Shared.GameStartOptions() {Width=200, Height=200, StartingArmiesPerPlayer=10 });
-            game.StartJoining();
+            this.game = game;
         }
         public Task SendMessage(string user, string message)
         {
@@ -34,14 +31,14 @@ namespace Risk.Server.Hubs
         {
             logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
             var newPlayer = new Player(Context.ConnectionId, user);
-            players.Add(newPlayer);
+            game.AddPlayer(newPlayer);
             BroadCastMessage(newPlayer.Name + " has joined the game");
             ConfirmSignup(newPlayer);
         }
 
         private Task ConfirmSignup(Player newPlayer)
         {
-            return Clients.Client(newPlayer.ConnectionId).SendAsync("ReceiveMessage", "Server", "Welcome to the game " + newPlayer.Name);
+            return Clients.Client(newPlayer.Token).SendAsync("ReceiveMessage", "Server", "Welcome to the game " + newPlayer.Name);
         }
 
         private Task BroadCastMessage(string message)
@@ -73,7 +70,7 @@ namespace Risk.Server.Hubs
 
         public async void DeployRequest(Location l)
         {
-            if(game.TryPlaceArmy(players.First(p => p.ConnectionId == Context.ConnectionId).Token, l))
+            if(game.TryPlaceArmy(Context.ConnectionId, l))
             {
                 return;
             }
@@ -83,16 +80,21 @@ namespace Risk.Server.Hubs
             }
         }
 
-        public async void AttackRequest(Location from, Location to)
-        {
-            //verify they can attack, if so roll for attack, if not ask user again or skip
-        }
+        //public async void AttackRequest(Location from, Location to)
+        //{
+        //    //verify they can attack, if so roll for attack, if not ask user again or skip
+        //    if(game.TryAttack(players.First(p => p.ConnectionId == Context.ConnectionId).Token, ))
+        //}
 
         public async void ContinueAttackRequest(Location from, Location to)
         {
             //verify they are attacking where they say they are, if so, continue attacking, if not ask again or skip
         }
 
+        public async void CeaseAttackingRequest(Location from, Location to)
+        {
+
+        }
 
     }
 }
