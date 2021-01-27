@@ -37,7 +37,7 @@
             messages.Add(encodedMsg);
             StateHasChanged();
         });
-        hubConnection.On<Board>("Deploy", (board) =>
+        hubConnection.On<Board>("DeployTask", (board) =>
         {
             //logic here that decides where the best place to place army, probably want to give the board
             Deploy();

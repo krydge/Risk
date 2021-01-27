@@ -14,7 +14,6 @@ namespace Risk.Server.Hubs
     {
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
-        private readonly GameRunner gameRunner;
 
         private Risk.Game.Game game { get; set; }
         public RiskHub(ILogger<RiskHub> logger, IConfiguration config, Game.Game game)
@@ -59,7 +58,7 @@ namespace Risk.Server.Hubs
             {
                 await BroadCastMessage("The Game has started");
                 game.StartGame();
-                StartDeployPhase();
+                StartDeployPhase(Context.ConnectionId);
             }
             else
             {
@@ -77,20 +76,17 @@ namespace Risk.Server.Hubs
         {
             if(game.TryPlaceArmy(Context.ConnectionId, l))
             {
-                return;
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", $"Successfully Deployed At {l.Row}, {l.Column}");
             }
             else
             {
-                //Failed to place army, ask user again? or skip?
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "Did not deploy successfully");
             }
         }
 
-        private async void StartDeployPhase()
+        private async void StartDeployPhase(string ConId)
         {
-            foreach(Player P in game.Players)
-            {
-                await Clients.Client(P.Token).SendAsync("Deploy", game.Board);
-            }
+            await Clients.Client(Context.ConnectionId).SendAsync("DeployTask", game.Board);
         }
 
         //public async void AttackRequest(Location from, Location to)
