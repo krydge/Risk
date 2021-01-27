@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Risk.Server\Risk.Server.csproj" />
     <ProjectReference Include="..\Risk.Shared\Risk.Shared.csproj" />
     <ProjectReference Include="..\Risk.Game\Risk.Game.csproj" />
   </ItemGroup>

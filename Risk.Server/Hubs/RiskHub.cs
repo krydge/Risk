@@ -14,6 +14,7 @@ namespace Risk.Server.Hubs
     {
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
+        private readonly GameRunner gameRunner;
 
         private Risk.Game.Game game { get; set; }
         public RiskHub(ILogger<RiskHub> logger, IConfiguration config, Game.Game game)
@@ -52,14 +53,18 @@ namespace Risk.Server.Hubs
             return Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", game.GameState.ToString());
         }
 
-        public Task StartGame(string Password)
+        public async Task StartGame(string Password)
         {
             if (Password == config["PASSWORD"])
             {
+                await BroadCastMessage("The Game has started");
                 game.StartGame();
-                return BroadCastMessage("The Game has started");   
+                StartDeployPhase();
             }
-            return Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "Incorrect password");
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "Incorrect password");
+            }
         }
 
         public override Task OnConnectedAsync()
@@ -77,6 +82,14 @@ namespace Risk.Server.Hubs
             else
             {
                 //Failed to place army, ask user again? or skip?
+            }
+        }
+
+        private async void StartDeployPhase()
+        {
+            foreach(Player P in game.Players)
+            {
+                await Clients.Client(P.Token).SendAsync("Deploy", game.Board);
             }
         }
 

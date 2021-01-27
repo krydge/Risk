@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using Risk.Api;
 using Risk.Game;
 using Risk.Shared;
 
@@ -24,8 +23,8 @@ namespace Risk.Tests
             testgame.StartJoining();
             player1Token = Guid.NewGuid().ToString();
             player2Token = Guid.NewGuid().ToString();
-            testgame.AddPlayer(new ApiPlayer("player1", player1Token, null));
-            testgame.AddPlayer(new ApiPlayer("player2", player2Token, null));
+            testgame.AddPlayer(new Player("player1", player1Token));
+            testgame.AddPlayer(new Player("player2", player2Token));
 
             testgame.StartGame();
 
@@ -87,8 +86,8 @@ namespace Risk.Tests
         {
             territory1.Armies = 5;
             territory2.Armies = 5;
-            territory1.Owner = new ApiPlayer("player1",player1Token, null) ;
-            territory2.Owner = new ApiPlayer("player2",player2Token, null);
+            territory1.Owner = new Player("player1",player1Token);
+            territory2.Owner = new Player("player2",player2Token);
             testgame.BattleWasWon(territory1, territory2);
             territory1.Armies.Should().Be(1);
             territory2.Armies.Should().Be(4);

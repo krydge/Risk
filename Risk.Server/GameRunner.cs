@@ -43,5 +43,10 @@ namespace Risk.Server
         {
             throw new NotImplementedException();
         }
+
+        public void BootPlayerFromGame(Player apiPlayer)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

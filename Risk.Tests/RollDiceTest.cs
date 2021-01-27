@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using FluentAssertions;
 using NUnit.Framework;
-using Risk.Api;
 using Risk.Game;
 using Risk.Shared;
 
@@ -12,9 +11,9 @@ namespace Risk.Tests
 {
     class RollDiceTest {
 
-        private BeginAttackResponse newAttackResponse;
+        //private BeginAttackResponse newAttackResponse;
         private Game.Game game;
-        private List<ApiPlayer> players;
+        private List<Player> players;
 
         [SetUp]
         public void Setup()
@@ -23,11 +22,11 @@ namespace Risk.Tests
             int height = 2;
 
 
-            IPlayer player = new ApiPlayer("Rusty", "bazookaJoe", null);
-            IPlayer player2 = new ApiPlayer("Emmanuel", "Macaco", null);
+            IPlayer player = new Player("Rusty", "bazookaJoe");
+            IPlayer player2 = new Player("Emmanuel", "Macaco");
             game = new Game.Game(new GameStartOptions { Height = height, Width = width, StartingArmiesPerPlayer = 3});
-            game.AddPlayer(new ApiPlayer("Rusty", "bazookaJoe", null));
-            game.AddPlayer(new ApiPlayer("Emmanuel", "Macaco", null));
+            game.AddPlayer(new Player("Rusty", "bazookaJoe"));
+            game.AddPlayer(new Player("Emmanuel", "Macaco"));
             Location attacker = new Location(1, 1);
             Location attacker2 = new Location(0, 1);
             Location defender = new Location(0, 0);
