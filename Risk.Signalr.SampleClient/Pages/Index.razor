@@ -1,13 +1,18 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Logging;
+@inject ILoggerProvider LoggerProvider
+@inject PlayerLogic playerLogic
 
-<h5>Send Message</h5>
+<h5>Welcome Player: @playerLogic.MyPlayerName</h5>
 <div>
     <span>Input:</span><input type="text" @bind="userInput" /><br />
     <button @onclick="Signup">Signup</button>
-    <button @onclick="GameStatus">Get Status</button>
+    <br/>
+    <input type="text" @bind="secretCode" />
     <button @onclick="StartGame">Start Game</button>
-    <button @onclick="Deploy">Try Deploy</button>
+    <br/>
+    <button @onclick="GameStatus">Get Status</button>
 </div>
 
 <h5>List of Messages</h5>
@@ -18,7 +23,7 @@
     }
 </ul>
 
-<textarea @b></textarea>
+<textarea @bind="logMessages"></textarea>
 
 
 @code{
@@ -26,35 +31,47 @@
     private List<string> messages = new List<string>();
     private string userInput;
     private string messageInput;
+    private string logMessages;
+    private string secretCode = "banana55";
 
 
     protected override async Task OnInitializedAsync()
     {
-        hubConnection = new HubConnectionBuilder().WithUrl("http://localhost:5000/riskhub").Build();
-        hubConnection.On<string, string>("ReceiveMessage", (user, message) =>
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:5000/riskhub")
+            .ConfigureLogging(logBuilder =>
+            {
+                //logBuilder.AddSimpleConsole();
+                logBuilder.AddDebug();
+            })
+            .Build();
+        hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
             messages.Add(encodedMsg);
             StateHasChanged();
         });
-        hubConnection.On<Board>("DeployTask", (board) =>
+        hubConnection.On<IEnumerable<BoardTerritory>>(MessageTypes.YourTurnToDeploy, (board) =>
         {
-            //logic here that decides where the best place to place army, probably want to give the board
-            Deploy();
+            var deployLocation = playerLogic.WhereDoYouWantToDeploy(board);
+            Deploy(deployLocation);
+        });
+        hubConnection.On<GameStatus>(MessageTypes.SendStatus, status =>
+        {
+            logMessages = status.ToString();
         });
 
         await hubConnection.StartAsync();
+        logMessages += "My connection id is " + hubConnection.ConnectionId;
     }
 
-    Task Send() => hubConnection.SendAsync("SendMessage", userInput, messageInput);
-    Task Signup() => hubConnection.SendAsync("Signup", userInput);
-    Task GameStatus() => hubConnection.SendAsync("GetStatus");
-    Task StartGame() => hubConnection.SendAsync("StartGame", userInput);
-    //(name of hub control, location of placing units)
-    Task Deploy() => hubConnection.SendAsync("DeployRequest", new Location() { Row = 1, Column=2});
-    //(name of hub control, (to), (from)
-    Task Attack() => hubConnection.SendAsync("AttackRequest", new Location() { Row = 1, Column = 2 }, new Location() { Row = 1, Column = 3 });
-    
+    async Task Send() => await hubConnection.SendAsync(MessageTypes.SendMessage, userInput, messageInput);
+    async Task Signup() => await hubConnection.SendAsync(MessageTypes.Signup, userInput);
+    async Task GameStatus() => await hubConnection.SendAsync(MessageTypes.GetStatus);
+    async Task StartGame() => await hubConnection.SendAsync(MessageTypes.StartGame, secretCode);
+    async Task Deploy(Location desiredLocation) => await hubConnection.SendAsync(MessageTypes.DeployRequest, desiredLocation);
+    async Task Attack(Location to, Location from) => await hubConnection.SendAsync(MessageTypes.AttackRequest, to, from);
+
 
 
 }

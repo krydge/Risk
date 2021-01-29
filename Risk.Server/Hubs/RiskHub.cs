@@ -10,7 +10,7 @@ using Risk.Shared;
 
 namespace Risk.Server.Hubs
 {
-    public class RiskHub : Hub
+    public class RiskHub : Hub<IRiskHub>
     {
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
@@ -22,71 +22,68 @@ namespace Risk.Server.Hubs
             this.config = config;
             this.game = game;
         }
-        public Task SendMessage(string user, string message)
+
+        public async Task SendMessage(string user, string message)
         {
-            return Clients.All.SendAsync("ReceiveMessage", user, message);
+            await Clients.All.SendMessage(user, message);
         }
 
-        public void Signup(string user)
+        public async Task Signup(string user)
         {
             logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
             var newPlayer = new Player(Context.ConnectionId, user);
             game.AddPlayer(newPlayer);
-            BroadCastMessage(newPlayer.Name + " has joined the game");
-            ConfirmSignup(newPlayer);
+            await BroadCastMessage(newPlayer.Name + " has joined the game");
+            await Clients.Client(newPlayer.Token).SendMessage("Server", "Welcome to the game " + newPlayer.Name);
         }
 
-        private Task ConfirmSignup(Player newPlayer)
+        private async Task BroadCastMessage(string message)
         {
-            return Clients.Client(newPlayer.Token).SendAsync("ReceiveMessage", "Server", "Welcome to the game " + newPlayer.Name);
+            await Clients.All.SendMessage("Server", message);
         }
 
-        private Task BroadCastMessage(string message)
+        public async Task GetStatus()
         {
-            return Clients.All.SendAsync("ReceiveMessage", "Server", message);
-        }
-
-
-        public Task GetStatus()
-        {
-            return Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", game.GameState.ToString());
+            await Clients.Client(Context.ConnectionId).SendStatus(game.GetGameStatus());
         }
 
         public async Task StartGame(string Password)
         {
-            if (Password == config["PASSWORD"])
+            if (Password == config["StartGameCode"])
             {
                 await BroadCastMessage("The Game has started");
                 game.StartGame();
-                StartDeployPhase(Context.ConnectionId);
+                await StartDeployPhase(Context.ConnectionId);
             }
             else
             {
-                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "Incorrect password");
+                await Clients.Client(Context.ConnectionId).SendMessage("Server", "Incorrect password");
             }
         }
 
-        public override Task OnConnectedAsync()
+        public override async Task OnConnectedAsync()
         {
             logger.LogInformation(Context.ConnectionId);
-            return base.OnConnectedAsync();
+            await base.OnConnectedAsync();
         }
 
-        public async void DeployRequest(Location l)
+        public async Task DeployRequest(Location l)
         {
             if(game.TryPlaceArmy(Context.ConnectionId, l))
             {
-                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", $"Successfully Deployed At {l.Row}, {l.Column}");
+                await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Successfully Deployed At {l.Row}, {l.Column}");
             }
             else
             {
-                await Clients.Client(Context.ConnectionId).SendAsync("ReceiveMessage", "Server", "Did not deploy successfully");
+                await Clients.Client(Context.ConnectionId).SendMessage("Server", "Did not deploy successfully");
             }
         }
 
-        private async void StartDeployPhase(string ConId)
+        private async Task StartDeployPhase(string ConId)
         {
-            await Clients.Client(Context.ConnectionId).SendAsync("DeployTask", game.Board);
+            logger.LogInformation("Sending {message} to {connectionId}", MessageTypes.YourTurnToDeploy, ConId);
+            await Clients.Client(ConId).YourTurnToDeploy(game.Board.SerializableTerritories);
+            await Clients.Client(ConId).SendMessage("test", "message");
         }
 
         //public async void AttackRequest(Location from, Location to)
