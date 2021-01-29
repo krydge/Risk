@@ -13,6 +13,7 @@ namespace Risk.Shared
             this.Name = nam;
             Token = conId;
             TerritoryCards = new List<int>();
+            InvalidRequests = 0;
         }
 
 
@@ -21,5 +22,6 @@ namespace Risk.Shared
         public string Token { get; set; }
 
         public List<int> TerritoryCards { get; set; }
+        public int InvalidRequests { get; set; }
     }
 }

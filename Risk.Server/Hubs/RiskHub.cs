@@ -14,6 +14,9 @@ namespace Risk.Server.Hubs
     {
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
+        public const int MaxFailedTries = 5;
+
+        private Player currentPlayer => (game.CurrentPlayer as Player);
 
         private Risk.Game.Game game { get; set; }
         public RiskHub(ILogger<RiskHub> logger, IConfiguration config, Game.Game game)
@@ -21,6 +24,11 @@ namespace Risk.Server.Hubs
             this.logger = logger;
             this.config = config;
             this.game = game;
+        }
+        public override async Task OnConnectedAsync()
+        {
+            logger.LogInformation(Context.ConnectionId);
+            await base.OnConnectedAsync();
         }
 
         public async Task SendMessage(string user, string message)
@@ -53,38 +61,83 @@ namespace Risk.Server.Hubs
             {
                 await BroadCastMessage("The Game has started");
                 game.StartGame();
-                await StartDeployPhase(Context.ConnectionId);
+                await StartDeployPhase();
             }
             else
             {
                 await Clients.Client(Context.ConnectionId).SendMessage("Server", "Incorrect password");
             }
         }
-
-        public override async Task OnConnectedAsync()
+        private async Task StartDeployPhase()
         {
-            logger.LogInformation(Context.ConnectionId);
-            await base.OnConnectedAsync();
+            game.CurrentPlayer = game.Players.First();
+
+            await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
         }
+
 
         public async Task DeployRequest(Location l)
         {
-            if(game.TryPlaceArmy(Context.ConnectionId, l))
+            if(Context.ConnectionId == currentPlayer.Token)
             {
-                await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Successfully Deployed At {l.Row}, {l.Column}");
+                if(currentPlayer.InvalidRequests >= MaxFailedTries)
+                {
+                    await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Too many bad requests. No risk for you");
+                    game.RemovePlayerByToken(currentPlayer.Token);
+                    game.RemovePlayerFromBoard(currentPlayer.Token);
+                    await tellNextPlayerToDeploy();
+                    return;
+                }
+
+                if(game.TryPlaceArmy(Context.ConnectionId, l))
+                {
+                    await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Successfully Deployed At {l.Row}, {l.Column}");
+
+                    if(game.GameState == GameState.Deploying)
+                    {
+                        await tellNextPlayerToDeploy();
+                    }
+                    else
+                    {
+                        await StartAttackPhase();
+                    }
+
+                }
+                else
+                {
+                    await Clients.Client(Context.ConnectionId).SendMessage("Server", "Did not deploy successfully");
+                    currentPlayer.InvalidRequests++;
+                    await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
+
+                }
             }
             else
             {
-                await Clients.Client(Context.ConnectionId).SendMessage("Server", "Did not deploy successfully");
+                var badPlayer = game.Players.Single(p => p.Token == Context.ConnectionId) as Player;
+                badPlayer.InvalidRequests++;
+                await Clients.Client(badPlayer.Token).SendMessage("Server", "It's not your turn");
+
             }
         }
 
-        private async Task StartDeployPhase(string ConId)
+        private async Task tellNextPlayerToDeploy()
         {
-            logger.LogInformation("Sending {message} to {connectionId}", MessageTypes.YourTurnToDeploy, ConId);
-            await Clients.Client(ConId).YourTurnToDeploy(game.Board.SerializableTerritories);
-            await Clients.Client(ConId).SendMessage("test", "message");
+            var players = game.Players.ToList();
+            var currentPlayerIndex = players.IndexOf(game.CurrentPlayer);
+            var nextPlayerIndex = currentPlayerIndex++;
+            if (nextPlayerIndex >= players.Count)
+            {
+                nextPlayerIndex = 0;
+            }
+            game.CurrentPlayer = players[nextPlayerIndex];
+            await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
         }
+        private Task StartAttackPhase()
+        {
+            throw new NotImplementedException();
+        }
+
+
 
         //public async void AttackRequest(Location from, Location to)
         //{
@@ -101,6 +154,8 @@ namespace Risk.Server.Hubs
         {
 
         }
+
+        
 
     }
 }

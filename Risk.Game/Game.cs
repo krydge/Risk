@@ -15,7 +15,7 @@ namespace Risk.Game
             gameState = GameState.Initializing;
             playerDictionary = new ConcurrentDictionary<string, IPlayer>();
         }
-
+        public IPlayer CurrentPlayer { get; set; }
         private ConcurrentDictionary<string, IPlayer> playerDictionary;
         public IEnumerable<IPlayer> Players => playerDictionary.Values;
 
@@ -106,6 +106,18 @@ namespace Risk.Game
                 gameState = GameState.Attacking;
 
             return placeResult;
+        }
+
+        public void RemovePlayerFromBoard(String token)
+        {
+            foreach (Territory territory in Board.Territories)
+            {
+                if (territory.Owner == GetPlayer(token))
+                {
+                    territory.Owner = null;
+                    territory.Armies = 0;
+                }
+            }
         }
 
         public int GetPlayerRemainingArmies(string playerToken)
