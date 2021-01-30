@@ -24,6 +24,7 @@ namespace Risk.Game
         {
             playerDictionary.TryAdd(newPlayer.Token, newPlayer);
         }
+        public int OutstandingAttackRequestCount { get; set; }
 
         public IPlayer RemovePlayerByToken(string token)
         {
@@ -39,6 +40,8 @@ namespace Risk.Game
         public DateTime EndTime { get; set; }
         public int StartingArmies { get; }
         public GameState GameState => gameState;
+
+        public const int MaxTimesAPlayerCanNotAttack = 5;
 
         private IEnumerable<Territory> createTerritories(int height, int width)
         {

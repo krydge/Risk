@@ -2,17 +2,15 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging;
 @inject ILoggerProvider LoggerProvider
-@inject PlayerLogic playerLogic
 
-<h5>Welcome Player: @playerLogic.MyPlayerName</h5>
 <div>
     <span>Input:</span><input type="text" @bind="userInput" /><br />
-    <button @onclick="Signup">Signup</button>
+    <button @onclick="SignupAsync">Signup</button>
     <br />
     <input type="text" @bind="secretCode" />
-    <button @onclick="StartGame">Start Game</button>
+    <button @onclick="StartGameAsync">Start Game</button>
     <br />
-    <button @onclick="GameStatus">Get Status</button>
+    <button @onclick="GameStatusAsync">Get Status</button>
 </div>
 
 <h5>List of Messages</h5>
@@ -24,7 +22,7 @@
 </ul>
 
 <textarea @bind="logMessages"></textarea>
-@if(Status != null)
+@if (Status != null)
 {
     <div class="playerStats">
         <h5>@Status.GameState</h5>
@@ -61,16 +59,17 @@
     private string logMessages;
     private string secretCode = "banana55";
     private GameStatus Status;
-
+    private PlayerLogic playerLogic;
 
     protected override async Task OnInitializedAsync()
     {
+
         hubConnection = new HubConnectionBuilder()
             .WithUrl("http://localhost:5000/riskhub")
             .ConfigureLogging(logBuilder =>
             {
-            //logBuilder.AddSimpleConsole();
-            logBuilder.AddDebug();
+                    //logBuilder.AddSimpleConsole();
+                    logBuilder.AddDebug();
             })
             .Build();
         hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
@@ -79,27 +78,45 @@
             messages.Add(encodedMsg);
             StateHasChanged();
         });
-        hubConnection.On<IEnumerable<BoardTerritory>>(MessageTypes.YourTurnToDeploy, (board) =>
+        hubConnection.On<IEnumerable<BoardTerritory>>(MessageTypes.YourTurnToDeploy, async (board) =>
         {
             var deployLocation = playerLogic.WhereDoYouWantToDeploy(board);
-            Deploy(deployLocation);
+            await DeployAsync(deployLocation);
         });
         hubConnection.On<GameStatus>(MessageTypes.SendStatus, status =>
         {
             Status = status;
             StateHasChanged();
         });
+        hubConnection.On<IEnumerable<BoardTerritory>>(MessageTypes.YourTurnToAttack, async (board) =>
+        {
+            try
+            {
+                (var from, var to) = playerLogic.WhereDoYouWantToAttack(board);
+                await AttackAsync(from, to);
+            }
+            catch
+            {
+                await AttackCompleteAsync();
+            }
+
+        });
 
         await hubConnection.StartAsync();
         logMessages += "My connection id is " + hubConnection.ConnectionId;
     }
 
-    async Task Send() => await hubConnection.SendAsync(MessageTypes.SendMessage, userInput, messageInput);
-    async Task Signup() => await hubConnection.SendAsync(MessageTypes.Signup, userInput);
-    async Task GameStatus() => await hubConnection.SendAsync(MessageTypes.GetStatus);
-    async Task StartGame() => await hubConnection.SendAsync(MessageTypes.StartGame, secretCode);
-    async Task Deploy(Location desiredLocation) => await hubConnection.SendAsync(MessageTypes.DeployRequest, desiredLocation);
-    async Task Attack(Location to, Location from) => await hubConnection.SendAsync(MessageTypes.AttackRequest, to, from);
+    async Task SendAsync() => await hubConnection.SendAsync(MessageTypes.SendMessage, userInput, messageInput);
+    async Task SignupAsync()
+    {
+        await hubConnection.SendAsync(MessageTypes.Signup, userInput);
+        playerLogic = new PlayerLogic(userInput);
+    }
+    async Task GameStatusAsync() => await hubConnection.SendAsync(MessageTypes.GetStatus);
+    async Task StartGameAsync() => await hubConnection.SendAsync(MessageTypes.StartGame, secretCode);
+    async Task DeployAsync(Location desiredLocation) => await hubConnection.SendAsync(MessageTypes.DeployRequest, desiredLocation);
+    async Task AttackAsync(Location from, Location to) => await hubConnection.SendAsync(MessageTypes.AttackRequest, from, to);
+    async Task AttackCompleteAsync() => await hubConnection.SendAsync(MessageTypes.AttackComplete);
 
 
 

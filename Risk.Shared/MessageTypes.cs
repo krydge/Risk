@@ -16,5 +16,7 @@ namespace Risk.Shared
         public const string DeployRequest = "DeployRequest";
         public const string AttackRequest = "AttackRequest";
         public const string Signup = "Signup";
+        public const string YourTurnToAttack = "YourTurnToAttack";
+        public const string AttackComplete = "AttackComplete";
     }
 }

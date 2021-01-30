@@ -14,6 +14,8 @@ namespace Risk.Server.Hubs
         Task StartGame(string secretCode);
         Task DeployRequest(Location location);
         Task AttackRequest(Location from, Location to);
+        Task AttackComplete();
         Task YourTurnToDeploy(IEnumerable<BoardTerritory> currentBoard);
+        Task YourTurnToAttack(IEnumerable<BoardTerritory> currentBoard);
     }
 }
