@@ -8,10 +8,10 @@
 <div>
     <span>Input:</span><input type="text" @bind="userInput" /><br />
     <button @onclick="Signup">Signup</button>
-    <br/>
+    <br />
     <input type="text" @bind="secretCode" />
     <button @onclick="StartGame">Start Game</button>
-    <br/>
+    <br />
     <button @onclick="GameStatus">Get Status</button>
 </div>
 
@@ -24,6 +24,33 @@
 </ul>
 
 <textarea @bind="logMessages"></textarea>
+@if(Status != null)
+{
+    <div class="playerStats">
+        <h5>@Status.GameState</h5>
+        <table cellpadding="2px, 10px">
+            <thead>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Territories</th>
+                    <th>Armies</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            @foreach (var p in Status.PlayerStats.OrderByDescending(p => p.Score))
+            {
+                <tr>
+                    <td>@p.Name</td>
+                    <td>@p.Territories</td>
+                    <td>@p.Armies</td>
+                    <td>@p.Score</td>
+                </tr>
+            }
+        </table>
+    </div>
+}
+
+
 
 
 @code{
@@ -33,6 +60,7 @@
     private string messageInput;
     private string logMessages;
     private string secretCode = "banana55";
+    private GameStatus Status;
 
 
     protected override async Task OnInitializedAsync()
@@ -41,8 +69,8 @@
             .WithUrl("http://localhost:5000/riskhub")
             .ConfigureLogging(logBuilder =>
             {
-                //logBuilder.AddSimpleConsole();
-                logBuilder.AddDebug();
+            //logBuilder.AddSimpleConsole();
+            logBuilder.AddDebug();
             })
             .Build();
         hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
@@ -58,7 +86,8 @@
         });
         hubConnection.On<GameStatus>(MessageTypes.SendStatus, status =>
         {
-            logMessages = status.ToString();
+            Status = status;
+            StateHasChanged();
         });
 
         await hubConnection.StartAsync();

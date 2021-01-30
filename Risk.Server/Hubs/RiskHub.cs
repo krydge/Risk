@@ -38,11 +38,25 @@ namespace Risk.Server.Hubs
 
         public async Task Signup(string user)
         {
-            logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
-            var newPlayer = new Player(Context.ConnectionId, user);
-            game.AddPlayer(newPlayer);
-            await BroadCastMessage(newPlayer.Name + " has joined the game");
-            await Clients.Client(newPlayer.Token).SendMessage("Server", "Welcome to the game " + newPlayer.Name);
+            var duplicatePlayer = game.Players.ToList().FirstOrDefault(player => player.Token == Context.ConnectionId);
+            if(duplicatePlayer != null)
+            {
+                await Clients.Client(duplicatePlayer.Token).SendMessage("Server", $"There is already a player registered on your client named {duplicatePlayer.Name}");
+                (duplicatePlayer as Player).InvalidRequests++;
+            }
+            else
+            {
+                var sameNames = game.Players.Where(p => p.Name == user);
+                if(sameNames.Count() != 0)
+                {
+                    user = string.Concat(user, (sameNames.Count()+1).ToString());
+                }
+                logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
+                var newPlayer = new Player(Context.ConnectionId, user);
+                game.AddPlayer(newPlayer);
+                await BroadCastMessage(newPlayer.Name + " has joined the game");
+                await Clients.Client(newPlayer.Token).SendMessage("Server", "Welcome to the game " + newPlayer.Name);
+            }
         }
 
         private async Task BroadCastMessage(string message)
@@ -52,6 +66,7 @@ namespace Risk.Server.Hubs
 
         public async Task GetStatus()
         {
+            await Clients.Client(Context.ConnectionId).SendMessage("Server", game.GameState.ToString());
             await Clients.Client(Context.ConnectionId).SendStatus(game.GetGameStatus());
         }
 
@@ -124,7 +139,7 @@ namespace Risk.Server.Hubs
         {
             var players = game.Players.ToList();
             var currentPlayerIndex = players.IndexOf(game.CurrentPlayer);
-            var nextPlayerIndex = currentPlayerIndex++;
+            var nextPlayerIndex = currentPlayerIndex + 1;
             if (nextPlayerIndex >= players.Count)
             {
                 nextPlayerIndex = 0;
