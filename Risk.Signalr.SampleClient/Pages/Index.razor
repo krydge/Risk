@@ -3,25 +3,17 @@
 @using Microsoft.Extensions.Logging;
 @inject ILoggerProvider LoggerProvider
 
+
 <div>
     <span>Input:</span><input type="text" @bind="userInput" /><br />
     <button @onclick="SignupAsync">Signup</button>
     <br />
     <input type="text" @bind="secretCode" />
     <button @onclick="StartGameAsync">Start Game</button>
-    <br />
-    <button @onclick="GameStatusAsync">Get Status</button>
 </div>
 
-<h5>List of Messages</h5>
-<ul>
-    @foreach (var message in messages)
-    {
-        <li>@message</li>
-    }
-</ul>
 
-<textarea @bind="logMessages"></textarea>
+
 @if (Status != null)
 {
     <div class="playerStats">
@@ -46,7 +38,40 @@
             }
         </table>
     </div>
+
+    <div class="grid-container">
+        <table border="1px" cellpadding="10px">
+            @for (var row = 0; row <= MaxRow; row++)
+            {
+                <tr>
+                    @for (var col = 0; col <= MaxCol; col++)
+                    {
+                        var cell = Status.Board.First(t => t.Location == new Location(row, col));
+                        var style = (MarkupString)(string.IsNullOrEmpty(cell.OwnerName)
+                            ? string.Empty
+                            : $"background-color:{ColorGenerator.GetColor(cell.OwnerName)}");
+
+                        <td class="cell" style="@style">
+                            <div class="location">@cell.Location</div>
+                            <div class="armies">@cell.Armies</div>
+                            <div class="name">@cell.OwnerName</div>
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+    </div>
 }
+
+<h5>List of Messages</h5>
+<ul>
+    @foreach (var message in messages)
+    {
+        <li>@message</li>
+    }
+</ul>
+
+
 
 
 
@@ -60,6 +85,8 @@
     private string secretCode = "banana55";
     private GameStatus Status;
     private PlayerLogic playerLogic;
+    private int MaxRow = 0;
+    private int MaxCol = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -68,8 +95,8 @@
             .WithUrl("http://localhost:5000/riskhub")
             .ConfigureLogging(logBuilder =>
             {
-                    //logBuilder.AddSimpleConsole();
-                    logBuilder.AddDebug();
+            //logBuilder.AddSimpleConsole();
+            logBuilder.AddDebug();
             })
             .Build();
         hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
@@ -86,6 +113,11 @@
         hubConnection.On<GameStatus>(MessageTypes.SendStatus, status =>
         {
             Status = status;
+            if (MaxRow == 0)
+            {
+                MaxRow = status.Board.Max(t => t.Location.Row);
+                MaxCol = status.Board.Max(t => t.Location.Column);
+            }
             StateHasChanged();
         });
         hubConnection.On<IEnumerable<BoardTerritory>>(MessageTypes.YourTurnToAttack, async (board) =>
@@ -105,6 +137,7 @@
         await hubConnection.StartAsync();
         logMessages += "My connection id is " + hubConnection.ConnectionId;
     }
+
 
     async Task SendAsync() => await hubConnection.SendAsync(MessageTypes.SendMessage, userInput, messageInput);
     async Task SignupAsync()

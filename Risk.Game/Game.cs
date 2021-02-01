@@ -238,7 +238,7 @@ namespace Risk.Game
             {
                  
                 BattleWasWon(attackingTerritory, defendingTerritory);
-                AddOneTerritoryCard(attackingTerritory.Owner.TerritoryCards, defendingTerritory); // This is the Call to AddOneTerritoryCard()
+                //AddOneTerritoryCard(attackingTerritory.Owner.TerritoryCards, defendingTerritory); // This is the Call to AddOneTerritoryCard()
                 return new TryAttackResult {
                     CanContinue = false,
                     AttackInvalid = false

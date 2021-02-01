@@ -109,6 +109,7 @@ namespace Risk.Server.Hubs
 
                 if(game.TryPlaceArmy(Context.ConnectionId, l))
                 {
+                    await Clients.All.SendStatus(game.GetGameStatus());
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Successfully Deployed At {l.Row}, {l.Column}");
                     logger.LogInformation("{currentPlayer} deployed at {l}", currentPlayer, l);
 
@@ -190,6 +191,7 @@ namespace Risk.Server.Hubs
                             logger.LogInformation($"{currentPlayer.Name} wants to attack from {attackingTerritory} to {defendingTerritory}");
 
                             attackResult = game.TryAttack(currentPlayer.Token, attackingTerritory, defendingTerritory);
+                            await Clients.All.SendStatus(game.GetGameStatus());
                         }
                         catch (Exception ex)
                         {
@@ -200,6 +202,7 @@ namespace Risk.Server.Hubs
                             logger.LogError($"Invalid attack request! {currentPlayer.Name} from {attackingTerritory} to {defendingTerritory} ");
                             currentPlayer.InvalidRequests++;
                             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
+
                         }
                         else
                         {
@@ -208,7 +211,9 @@ namespace Risk.Server.Hubs
                             if (game.GameState == GameState.Attacking)
                             {
                                 if (game.PlayerCanAttack(currentPlayer))
+                                {
                                     await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
+                                }
                                 else
                                     await tellNextPlayerToAttack();
                             }
@@ -265,8 +270,12 @@ namespace Risk.Server.Hubs
 
         private async Task sendGameOverAsync()
         {
-            logger.LogInformation("Game Over. {gameStatus}", game.GetGameStatus());
-            await BroadCastMessage($"Game Over - {game.GetGameStatus().PlayerStats.OrderByDescending(s => s.Score).First().Name} wins!");
+            game.SetGameOver();
+            var status = game.GetGameStatus();
+            logger.LogInformation("Game Over. {gameStatus}", status);
+            var winners = status.PlayerStats.Where(s => s.Score == status.PlayerStats.Max(s => s.Score)).Select(s => s.Name);
+            await BroadCastMessage($"Game Over - {string.Join(',', winners)} win{(winners.Count() > 1?"":"s")}!");
+            await Clients.All.SendStatus(game.GetGameStatus());
         }
 
 
