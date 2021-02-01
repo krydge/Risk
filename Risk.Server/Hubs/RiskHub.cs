@@ -46,10 +46,16 @@ namespace Risk.Server.Hubs
             }
             else
             {
-                var sameNames = game.Players.Where(p => p.Name == user);
-                if(sameNames.Count() != 0)
+                var sameNames = game.Players.Where(p => p.Name.Contains(user));
+                if (sameNames.Count() != 0)
                 {
-                    user = string.Concat(user, (sameNames.Count()+1).ToString());
+                    int i = 0;
+                    var baseName = user;
+                    while (game.Players.Any(p => p.Name == user))
+                    {
+                        user = string.Concat(baseName, i.ToString());
+                        i++;
+                    }
                 }
                 logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
                 var newPlayer = new Player(Context.ConnectionId, user);
@@ -277,26 +283,6 @@ namespace Risk.Server.Hubs
             await BroadCastMessage($"Game Over - {string.Join(',', winners)} win{(winners.Count() > 1?"":"s")}!");
             await Clients.All.SendStatus(game.GetGameStatus());
         }
-
-
-
-        //public async void AttackRequest(Location from, Location to)
-        //{
-        //    //verify they can attack, if so roll for attack, if not ask user again or skip
-        //    if(game.TryAttack(players.First(p => p.ConnectionId == Context.ConnectionId).Token, ))
-        //}
-
-        public async void ContinueAttackRequest(Location from, Location to)
-        {
-            //verify they are attacking where they say they are, if so, continue attacking, if not ask again or skip
-        }
-
-        public async void CeaseAttackingRequest(Location from, Location to)
-        {
-
-        }
-
-        
 
     }
 }
