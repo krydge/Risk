@@ -12,7 +12,6 @@ namespace Risk.Signalr.SampleClient
         }
 
         static Queue<string> palette = new Queue<string>(new []{
-            "#FFFFFF",
             "#FFE6E6",
             "#4682B4",
             "#5F9EA0",
