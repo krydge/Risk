@@ -15,7 +15,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Risk.Signalr.SampleClient",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Risk.Tests", "Risk.Tests\Risk.Tests.csproj", "{028C3231-7421-4BE0-BDD4-5E73E688142E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Risk.Signalr.ConsoleClient", "Risk.Signalr.ConsoleClient\Risk.Signalr.ConsoleClient.csproj", "{BE797A7F-5329-4E26-ADCB-40C2236C5B87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Risk.Signalr.ConsoleClient", "Risk.Signalr.ConsoleClient\Risk.Signalr.ConsoleClient.csproj", "{BE797A7F-5329-4E26-ADCB-40C2236C5B87}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{338DF0AF-6581-4FD9-A748-274A711917EA}"
+	ProjectSection(SolutionItems) = preProject
+		GenerateContestantZip.ps1 = GenerateContestantZip.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

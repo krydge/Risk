@@ -45,6 +45,12 @@ namespace Risk.Signalr.ConsoleClient
                 }
 
             });
+            hubConnection.On<string>(MessageTypes.JoinConfirmation, validatedName => {
+
+                playerLogic = new PlayerLogic(validatedName);
+                Console.Title = validatedName;
+                Console.WriteLine($"Successfully joined server. Assigned Name is {validatedName}");
+            });
 
             await hubConnection.StartAsync();
             Console.WriteLine("My connection id is " + hubConnection.ConnectionId);
@@ -55,8 +61,6 @@ namespace Risk.Signalr.ConsoleClient
         static async Task SignupAsync(string playerName)
         {
             await hubConnection.SendAsync(MessageTypes.Signup, playerName);
-            playerLogic = new PlayerLogic(playerName);
-            Console.Title = playerName;
         }
         static async Task DeployAsync(Location desiredLocation) => await hubConnection.SendAsync(MessageTypes.DeployRequest, desiredLocation);
         static async Task AttackAsync(Location from, Location to) => await hubConnection.SendAsync(MessageTypes.AttackRequest, from, to);

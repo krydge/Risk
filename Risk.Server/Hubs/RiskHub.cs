@@ -58,6 +58,7 @@ namespace Risk.Server.Hubs
                 game.AddPlayer(newPlayer);
                 await BroadCastMessage(newPlayer.Name + " has joined the game");
                 await Clients.Client(newPlayer.Token).SendMessage("Server", "Welcome to the game " + newPlayer.Name);
+                await Clients.Client(newPlayer.Token).JoinConfirmation(newPlayer.Name);
             }
         }
 

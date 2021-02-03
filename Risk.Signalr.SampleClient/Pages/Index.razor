@@ -5,8 +5,15 @@
 
 
 <div>
-    <span>Input:</span><input type="text" @bind="userInput" /><br />
-    <button @onclick="SignupAsync">Signup</button>
+    @if(playerLogic == null)
+    {
+        <span>Input:</span><input type="text" @bind="userInput" /><br />
+        <button @onclick="SignupAsync">Signup</button>
+    }
+    else
+    {
+        <h3>Joined game as @playerLogic.MyPlayerName</h3>
+    }
     <br />
     <input type="text" @bind="secretCode" />
     <button @onclick="StartGameAsync">Start Game</button>
@@ -95,8 +102,8 @@
             .WithUrl("http://localhost:5000/riskhub")
             .ConfigureLogging(logBuilder =>
             {
-            //logBuilder.AddSimpleConsole();
-            logBuilder.AddDebug();
+                //logBuilder.AddSimpleConsole();
+                logBuilder.AddDebug();
             })
             .Build();
         hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
@@ -133,6 +140,11 @@
             }
 
         });
+        hubConnection.On<string>(MessageTypes.JoinConfirmation, validatedName => {
+
+            playerLogic = new PlayerLogic(validatedName);
+            StateHasChanged();
+        });
 
         await hubConnection.StartAsync();
         logMessages += "My connection id is " + hubConnection.ConnectionId;
@@ -143,7 +155,6 @@
     async Task SignupAsync()
     {
         await hubConnection.SendAsync(MessageTypes.Signup, userInput);
-        playerLogic = new PlayerLogic(userInput);
     }
     async Task GameStatusAsync() => await hubConnection.SendAsync(MessageTypes.GetStatus);
     async Task StartGameAsync() => await hubConnection.SendAsync(MessageTypes.StartGame, secretCode);
