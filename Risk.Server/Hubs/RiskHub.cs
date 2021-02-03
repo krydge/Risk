@@ -46,16 +46,12 @@ namespace Risk.Server.Hubs
             }
             else
             {
-                var sameNames = game.Players.Where(p => p.Name.Contains(user));
-                if (sameNames.Count() != 0)
+                int i = 1;
+                var baseName = user;
+                while (game.Players.Any(p => p.Name == user))
                 {
-                    int i = 0;
-                    var baseName = user;
-                    while (game.Players.Any(p => p.Name == user))
-                    {
-                        user = string.Concat(baseName, i.ToString());
-                        i++;
-                    }
+                    user = string.Concat(baseName, i.ToString());
+                    i++;
                 }
                 logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
                 var newPlayer = new Player(Context.ConnectionId, user);
