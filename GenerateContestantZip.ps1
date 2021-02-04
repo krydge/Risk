@@ -30,4 +30,6 @@ rm publish -r
 cd ..
 cd $outdir
 
-dir
+cd ..
+
+Compress-Archive -path "risk$version\*" -destination "risk$version"
