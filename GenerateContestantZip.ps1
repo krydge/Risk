@@ -11,15 +11,18 @@ write-host "this is version $version"
 cd Risk.Server
 dotnet publish -c Release -o publish -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -r win-x64
 
-#copying files over
+copying files over
 copy-item -path "publish/Risk.Server.exe" -destination "../$outdir"
 copy-item -path "publish/appsettings.json" -destination "../$outdir"
 
-#deleting publish folder
+deleting publish folder
 rm publish -r
 
-#getting console client
 cd ..
+copy-item -path "Risk.Shared\*" -destination "..\risk$version"
+copy-item -path "Risk.Signalr.ConsoleClient\*" -destination "..\risk$version"
+
+#getting console client
 cd risk.signalr.consoleclient
 dotnet publish -c Release -o publish -p:PublishReadyToRun=true -p:PublishSingleFile=true -p:PublishTrimmed=true --self-contained true -p:IncludeNativeLibrariesForSelfExtract=true -r win-x64
 
