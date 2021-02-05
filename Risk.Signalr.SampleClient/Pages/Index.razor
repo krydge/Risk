@@ -1,8 +1,9 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging;
+@using Microsoft.Extensions.Configuration
 @inject ILoggerProvider LoggerProvider
-
+@inject IConfiguration config
 
 <div>
     @if(playerLogic == null)
@@ -97,15 +98,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-
         hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5000/riskhub")
-            .ConfigureLogging(logBuilder =>
-            {
-                //logBuilder.AddSimpleConsole();
-                logBuilder.AddDebug();
-            })
-            .Build();
+        .WithUrl("http://localhost:5000/riskhub")
+        .ConfigureLogging(logBuilder =>
+        {
+            //logBuilder.AddSimpleConsole();
+            logBuilder.AddDebug();
+        })
+        .Build();
         hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
@@ -148,6 +148,12 @@
 
         await hubConnection.StartAsync();
         logMessages += "My connection id is " + hubConnection.ConnectionId;
+        if(config["PlayerName"] != null)
+        {
+            userInput = config["PlayerName"];
+            await SignupAsync();
+        }
+
     }
 
 

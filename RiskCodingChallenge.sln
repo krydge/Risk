@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{338DF0AF-6581-4FD9-A748-274A711917EA}"
 	ProjectSection(SolutionItems) = preProject
 		GenerateContestantZip.ps1 = GenerateContestantZip.ps1
+		StartGame.ps1 = StartGame.ps1
 	EndProjectSection
 EndProject
 Global
