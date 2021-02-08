@@ -21,6 +21,7 @@ cd ..
 pwd
 copy-item -path "Risk.Shared\*" -destination "..\$outdir\Risk.Shared" -recurse
 copy-item -path "Risk.Signalr.ConsoleClient\*" -destination "..\$outdir\YourCode" -recurse
+rename-item -path "../$outdir/YourCode/risk.signalr.consoleclient.csproj" -newname "YourCode.csproj"
 copy-item -path "Risk.Signalr.SampleClient\*" -destination "..\$outdir\Runner" -recurse
 copy-item -path "Risk.Game\*" -destination "..\$outdir\Risk.Game" -recurse
 copy-item -path "StartGame.ps1" -destination "..\$outdir" 

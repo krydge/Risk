@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/{*ServerAddress}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging;
 @using Microsoft.Extensions.Configuration
@@ -10,13 +10,13 @@
     {
         <span>Input:</span><input type="text" @bind="userInput" /><br />
         <button @onclick="SignupAsync">Signup</button>
+        <input type="text" @bind="secretCode" />
     }
     else
     {
         <h3>Joined game as @playerLogic.MyPlayerName</h3>
     }
     <br />
-    <input type="text" @bind="secretCode" />
     <button @onclick="StartGameAsync">Start Game</button>
 </div>
 
@@ -85,6 +85,8 @@
 
 
 @code{
+    [Parameter]
+    public string ServerAddress { get; set; } = "http://localhost:5000";
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
     private string userInput;
@@ -98,14 +100,15 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine("Server Address is " + ServerAddress);
         hubConnection = new HubConnectionBuilder()
-        .WithUrl("http://localhost:5000/riskhub")
-        .ConfigureLogging(logBuilder =>
-        {
-            //logBuilder.AddSimpleConsole();
-            logBuilder.AddDebug();
-        })
-        .Build();
+            .WithUrl("http://"+ServerAddress + "/riskhub")
+            .ConfigureLogging(logBuilder =>
+            {
+                //logBuilder.AddSimpleConsole();
+                logBuilder.AddDebug();
+            })
+            .Build();
         hubConnection.On<string, string>(MessageTypes.SendMessage, (user, message) =>
         {
             var encodedMsg = $"{user}: {message}";
