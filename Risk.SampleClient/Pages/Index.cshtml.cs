@@ -28,7 +28,6 @@ namespace Risk.SampleClient.Pages
         public int MaxRow { get; private set; }
         public int MaxCol { get; private set; }
 
-
         public ColorGenerator ColorGenerator { get; }
 
         public async Task OnGetAsync()

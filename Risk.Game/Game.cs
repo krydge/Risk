@@ -16,7 +16,7 @@ namespace Risk.Game
             playerDictionary = new ConcurrentDictionary<string, IPlayer>();
         }
         public IPlayer CurrentPlayer { get; set; }
-        private ConcurrentDictionary<string, IPlayer> playerDictionary;
+        private readonly ConcurrentDictionary<string, IPlayer> playerDictionary;
         public IEnumerable<IPlayer> Players => playerDictionary.Values;
 
         public int numberOfCardTurnIns = 1;
@@ -33,7 +33,7 @@ namespace Risk.Game
             throw new KeyNotFoundException($"Unable to locate player with token ${token} in list of players.");
         }
 
-        public Board Board { get; private set; }
+        public Board Board { get; }
         private GameState gameState { get; set; }
 
         public DateTime StartTime { get; set; }
@@ -63,12 +63,17 @@ namespace Risk.Game
 
         public void StartGame()
         {
+            var playerList = playerDictionary.ToList();
+            playerList.Shuffle();
+            playerDictionary.Clear();
+            playerList.ForEach(p => playerDictionary.TryAdd(p.Key, p.Value));
+
             gameState = GameState.Deploying;
         }
 
         public bool TryPlaceArmy(string playerToken, Location desiredLocation)
         {
-            var placeResult = false;
+            bool placeResult;
 
             if (gameState != Shared.GameState.Deploying)
                 return false;
@@ -135,7 +140,7 @@ namespace Risk.Game
         public bool CanChangeToAttackState()
         {
             int totalRemainingArmies = playerDictionary.Values.Sum(p => GetPlayerRemainingArmies(p.Token));
-            return (totalRemainingArmies == 0);
+            return totalRemainingArmies == 0;
         }
 
         public bool EnoughArmiesToAttack(Territory attacker)
@@ -148,7 +153,7 @@ namespace Risk.Game
             var territoryFrom = Board.Territories.Single(t => t.Location == from);
             var territoryTo = Board.Territories.Single(t => t.Location == to);
             var player = GetPlayer(playerToken);
-            return (territoryFrom.Owner == player && territoryTo.Owner != player);
+            return territoryFrom.Owner == player && territoryTo.Owner != player;
         }
 
         public bool PlayerCanAttack(IPlayer player)
@@ -174,7 +179,7 @@ namespace Risk.Game
                                   Name = p.Name,
                                   Armies = armies,
                                   Territories = territoryCount,
-                                  Score = armies + territoryCount * 2
+                                  Score = armies + (territoryCount * 2)
                               };
 
             return new GameStatus(playerNames, GameState, Board.AsBoardTerritoryList(), playerStats);
@@ -202,7 +207,7 @@ namespace Risk.Game
                 return new TryAttackResult { AttackInvalid = true };
             }
 
-            var rand = new Random();
+            Random rand;
             if (seed == 0)
             {
                 rand = new Random();
@@ -236,7 +241,6 @@ namespace Risk.Game
             }
             if (defendingTerritory.Armies < 1)
             {
-                 
                 BattleWasWon(attackingTerritory, defendingTerritory);
                 //AddOneTerritoryCard(attackingTerritory.Owner.TerritoryCards, defendingTerritory); // This is the Call to AddOneTerritoryCard()
                 return new TryAttackResult {
@@ -251,7 +255,7 @@ namespace Risk.Game
         {
             Random rnd = new Random();
             int cardNumber = rnd.Next(1, 4);
-            if (territoryCards.Count() < 6)
+            if (territoryCards.Count < 6)
             {
                 territoryCards.Add(cardNumber);
             }
@@ -266,13 +270,11 @@ namespace Risk.Game
         public void CheckCards(List<int> Cards, Territory territory)
         {
             Cards.Sort();
-            int x = 0;
-            int numberOfArmies;
-            while (x < Cards.Count - 2)
+            for (int x = 0; x < Cards.Count - 2; x++)
             {
                 if (Cards[x] == Cards[x + 1] && Cards[x + 2] == Cards[x + 1])
                 {
-                    territory.Armies = territory.Armies + (numberOfCardTurnIns * 5);
+                    territory.Armies += (numberOfCardTurnIns * 5);
                     numberOfCardTurnIns++;
                     Cards.Remove(Cards[x + 2]);
                     Cards.Remove(Cards[x + 1]);
@@ -286,12 +288,8 @@ namespace Risk.Game
                     Cards.Remove(Cards[x + 1]);
                     Cards.Remove(Cards[x]);
                 }
-                x++;
             }
-           
         }
-
-       
 
         private bool canAttack(string attackerToken, Territory attackingTerritory, Territory defendingTerritory)
         {
@@ -306,7 +304,7 @@ namespace Risk.Game
         {
             defendingTerritory.Owner = attackingTerritory.Owner;
             defendingTerritory.Armies = attackingTerritory.Armies - 1;
-            attackingTerritory.Armies = attackingTerritory.Armies - defendingTerritory.Armies;
+            attackingTerritory.Armies -= defendingTerritory.Armies;
         }
     }
 }

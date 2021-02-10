@@ -90,7 +90,6 @@
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
     private string userInput;
-    private string messageInput;
     private string logMessages;
     private string secretCode = "banana55";
     private GameStatus Status;
@@ -159,8 +158,6 @@
 
     }
 
-
-    async Task SendAsync() => await hubConnection.SendAsync(MessageTypes.SendMessage, userInput, messageInput);
     async Task SignupAsync()
     {
         await hubConnection.SendAsync(MessageTypes.Signup, userInput);
@@ -170,7 +167,4 @@
     async Task DeployAsync(Location desiredLocation) => await hubConnection.SendAsync(MessageTypes.DeployRequest, desiredLocation);
     async Task AttackAsync(Location from, Location to) => await hubConnection.SendAsync(MessageTypes.AttackRequest, from, to);
     async Task AttackCompleteAsync() => await hubConnection.SendAsync(MessageTypes.AttackComplete);
-
-
-
 }
