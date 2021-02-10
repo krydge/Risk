@@ -12,13 +12,10 @@ namespace Risk.SampleClient.Controllers
 {
     public class RiskClientController : Controller
     {
-        private readonly IHttpClientFactory httpClientFactory;
         private readonly IConfiguration config;
-        private static string serverAdress;
 
-        public RiskClientController(IHttpClientFactory httpClientFactory, IConfiguration config)
+        public RiskClientController(IConfiguration config)
         {
-            this.httpClientFactory = httpClientFactory;
             this.config = config;
         }
 
@@ -46,7 +43,7 @@ namespace Risk.SampleClient.Controllers
             return response;
         }
 
-        private IEnumerable<BoardTerritory> GetNeighbors(BoardTerritory territory, IEnumerable<BoardTerritory> board)
+        private static IEnumerable<BoardTerritory> GetNeighbors(BoardTerritory territory, IEnumerable<BoardTerritory> board)
         {
             var l = territory.Location;
             var neighborLocations = new[] {
@@ -100,10 +97,10 @@ namespace Risk.SampleClient.Controllers
         [HttpPost("continueAttacking")]
         public ContinueAttackResponse ContinueAttack([FromBody]ContinueAttackRequest continueAttackRequest)
         {
-            ContinueAttackResponse response = new ContinueAttackResponse();
-            response.ContinueAttacking = true;
-
-            return response;
+            return new ContinueAttackResponse
+            {
+                ContinueAttacking = true
+            };
         }
 
         public record GameOverRequest { }
@@ -113,6 +110,5 @@ namespace Risk.SampleClient.Controllers
         {
             return Ok(gameOverRequest);
         }
-
     }
 }
