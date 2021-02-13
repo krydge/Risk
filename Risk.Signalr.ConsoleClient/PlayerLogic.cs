@@ -8,7 +8,6 @@ namespace Risk.Signalr.ConsoleClient
 {
     public class PlayerLogic
     {
-
         public PlayerLogic(string playerName)
         {
             MyPlayerName = playerName;

@@ -10,7 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.3" />
+    <PackageReference Include="Syncfusion.Blazor" Version="18.4.0.42" />
   </ItemGroup>
 
   <ItemGroup>

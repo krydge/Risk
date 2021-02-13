@@ -31,6 +31,13 @@ namespace Risk.Server.Hubs
             await base.OnConnectedAsync();
         }
 
+        public override async Task OnDisconnectedAsync(Exception exception)
+        {
+            var player = game.RemovePlayerByToken(Context.ConnectionId);
+            await BroadCastMessageAsync($"Player {player.Name} disconnected.  Removed from game.");
+            await base.OnDisconnectedAsync(exception);
+        }
+
         public async Task SendMessage(string user, string message)
         {
             await Clients.All.SendMessage(user, message);
@@ -56,13 +63,13 @@ namespace Risk.Server.Hubs
                 logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
                 var newPlayer = new Player(Context.ConnectionId, user);
                 game.AddPlayer(newPlayer);
-                await BroadCastMessage(newPlayer.Name + " has joined the game");
+                await BroadCastMessageAsync(newPlayer.Name + " has joined the game");
                 await Clients.Client(newPlayer.Token).SendMessage("Server", "Welcome to the game " + newPlayer.Name);
                 await Clients.Client(newPlayer.Token).JoinConfirmation(newPlayer.Name);
             }
         }
 
-        private async Task BroadCastMessage(string message)
+        private async Task BroadCastMessageAsync(string message)
         {
             await Clients.All.SendMessage("Server", message);
         }
@@ -77,7 +84,7 @@ namespace Risk.Server.Hubs
         {
             if(password == config["StartGameCode"])
             {
-                await BroadCastMessage("Restarting game...");
+                await BroadCastMessageAsync("Restarting game...");
                 game.RestartGame();
                 await StartDeployPhase();
                 await Clients.All.SendStatus(game.GetGameStatus());
@@ -92,7 +99,7 @@ namespace Risk.Server.Hubs
         {
             if (Password == config["StartGameCode"])
             {
-                await BroadCastMessage("The Game has started");
+                await BroadCastMessageAsync("The Game has started");
                 game.StartGame();
                 await StartDeployPhase();
             }
@@ -292,7 +299,7 @@ namespace Risk.Server.Hubs
             var status = game.GetGameStatus();
             logger.LogInformation("Game Over. {gameStatus}", status);
             var winners = status.PlayerStats.Where(s => s.Score == status.PlayerStats.Max(s => s.Score)).Select(s => s.Name);
-            await BroadCastMessage($"Game Over - {string.Join(',', winners)} win{(winners.Count() > 1?"":"s")}!");
+            await BroadCastMessageAsync($"Game Over - {string.Join(',', winners)} win{(winners.Count() > 1?"":"s")}!");
             await Clients.All.SendStatus(game.GetGameStatus());
         }
 
