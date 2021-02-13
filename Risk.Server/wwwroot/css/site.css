@@ -48,3 +48,70 @@ a, .btn-link {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.location {
+    font-size: 10pt;
+    width: 48%;
+    float: left;
+}
+
+.name {
+    font-size: 14pt;
+    color: blue
+}
+
+.armies {
+    color: red;
+    font-weight: bold;
+    width: 48%;
+    float: right;
+    text-align: right;
+}
+
+.cell {
+    min-width: 25px;
+}
+
+.game-status {
+    max-width: 450px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto auto auto;
+    gap: 0px 0px;
+    grid-template-areas: "Legend Legend" "Label1 Value1" "Label2 Value2" "Label3 Value3";
+    margin: 5px;
+    padding: 10px;
+}
+
+.Legend {
+    grid-area: Legend;
+    font-weight: bold;
+    text-align: center;
+}
+
+.Label1 {
+    grid-area: Label1;
+}
+
+.Value1 {
+    grid-area: Value1;
+}
+
+.Label2 {
+    grid-area: Label2;
+}
+
+.Value2 {
+    grid-area: Value2;
+}
+
+.Label3 {
+    grid-area: Label3;
+}
+
+.Value3 {
+    grid-area: Value3;
+}

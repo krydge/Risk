@@ -80,12 +80,12 @@ namespace Risk.Server.Hubs
             await Clients.Client(Context.ConnectionId).SendStatus(game.GetGameStatus());
         }
 
-        public async Task RestartGame(string password)
+        public async Task RestartGame(string password, GameStartOptions startOptions)
         {
             if(password == config["StartGameCode"])
             {
                 await BroadCastMessageAsync("Restarting game...");
-                game.RestartGame();
+                game.RestartGame(startOptions);
                 await StartDeployPhase();
                 await Clients.All.SendStatus(game.GetGameStatus());
             }
@@ -270,7 +270,10 @@ namespace Risk.Server.Hubs
 
         public async Task AttackComplete()
         {
-            await tellNextPlayerToAttack();
+            if (game.Players.Count() > 1 && game.GameState == GameState.Attacking && game.Players.Any(p => game.PlayerCanAttack(p)))
+                await tellNextPlayerToAttack();
+            else
+                await sendGameOverAsync();
         }
 
         private async Task tellNextPlayerToAttack()

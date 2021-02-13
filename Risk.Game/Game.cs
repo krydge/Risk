@@ -10,19 +10,15 @@ namespace Risk.Game
     {
         public Game(GameStartOptions startOptions)
         {
-            Board = new Board(createTerritories(startOptions.Height, startOptions.Width));
-            StartingArmies = startOptions.StartingArmiesPerPlayer;
-            gameState = GameState.Initializing;
             playerDictionary = new ConcurrentDictionary<string, IPlayer>();
-            this.startOptions = startOptions;
+            inititializeGame(startOptions);
         }
         public IPlayer CurrentPlayer { get; set; }
         private readonly ConcurrentDictionary<string, IPlayer> playerDictionary;
-        private readonly GameStartOptions startOptions;
+        private GameStartOptions startOptions;
 
         public IEnumerable<IPlayer> Players => playerDictionary.Values;
 
-        public int numberOfCardTurnIns = 1;
         public void AddPlayer(IPlayer newPlayer)
         {
             playerDictionary.TryAdd(newPlayer.Token, newPlayer);
@@ -41,7 +37,7 @@ namespace Risk.Game
 
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public int StartingArmies { get; }
+        public int StartingArmies { get; private set; }
         public GameState GameState => gameState;
 
         public const int MaxTimesAPlayerCanNotAttack = 5;
@@ -59,15 +55,23 @@ namespace Risk.Game
             return territories;
         }
 
+        private void inititializeGame(GameStartOptions startOptions)
+        {
+            Board = new Board(createTerritories(startOptions.Height, startOptions.Width));
+            StartingArmies = startOptions.StartingArmiesPerPlayer;
+            gameState = GameState.Initializing;
+            this.startOptions = startOptions;
+            StartJoining();
+        }
+
         public void StartJoining()
         {
             gameState = GameState.Joining;
         }
 
-        public void RestartGame()
+        public void RestartGame(GameStartOptions startOptions)
         {
-            gameState = GameState.Joining;
-            Board = new Board(createTerritories(startOptions.Height, startOptions.Width));
+            inititializeGame(startOptions);
             StartGame();
         }
 
@@ -259,46 +263,6 @@ namespace Risk.Game
                 };
             }
             return new TryAttackResult { CanContinue = attackingTerritory.Armies > 1, AttackInvalid = false };
-        }
-        //This adds one Territory card with a Random integer value between 1 and 3. The call is located in the tryAttack win Condition. This also checks that the length of the territory card hand is less than 6.
-        public void AddOneTerritoryCard(List<int> territoryCards, Territory defendingTerritory)
-        {
-            Random rnd = new Random();
-            int cardNumber = rnd.Next(1, 4);
-            if (territoryCards.Count < 6)
-            {
-                territoryCards.Add(cardNumber);
-            }
-
-            if(territoryCards.Count > 2)
-            {
-                CheckCards(territoryCards, defendingTerritory);
-            }
-        }
-
-        //This Function Checks the deck for one of each card, or three of a kind.
-        public void CheckCards(List<int> Cards, Territory territory)
-        {
-            Cards.Sort();
-            for (int x = 0; x < Cards.Count - 2; x++)
-            {
-                if (Cards[x] == Cards[x + 1] && Cards[x + 2] == Cards[x + 1])
-                {
-                    territory.Armies += (numberOfCardTurnIns * 5);
-                    numberOfCardTurnIns++;
-                    Cards.Remove(Cards[x + 2]);
-                    Cards.Remove(Cards[x + 1]);
-                    Cards.Remove(Cards[x]);
-                }
-                else if (Cards[x] + 1 == Cards[x + 1] && Cards[x + 1] + 1 == Cards[x + 2])
-                {
-                    territory.Armies += (numberOfCardTurnIns * 5);
-                    numberOfCardTurnIns++;
-                    Cards.Remove(Cards[x + 2]);
-                    Cards.Remove(Cards[x + 1]);
-                    Cards.Remove(Cards[x]);
-                }
-            }
         }
 
         private bool canAttack(string attackerToken, Territory attackingTerritory, Territory defendingTerritory)

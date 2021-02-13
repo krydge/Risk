@@ -6,7 +6,7 @@
 @inject IConfiguration config
 
 <div>
-    @if(playerLogic == null)
+    @if (playerLogic == null)
     {
         <span>Input:</span><input type="text" @bind="userInput" /><br />
         <button @onclick="SignupAsync">Signup</button>
@@ -17,7 +17,28 @@
         <h3>Joined game as @playerLogic.MyPlayerName</h3>
     }
     <br />
-    <button @onclick="StartGameAsync">@actionButtonText</button>
+    @if (Status == null || Status.GameState == GameState.Joining || Status.GameState == GameState.GameOver)
+    {
+        <div class="grid-container game-status">
+            <div class="Legend">Game Start Options</div>
+            <div class="Label1">Board Height</div>
+            <div class="Value1">
+                <input type="number" @bind="startOptions.Height" />
+            </div>
+            <div class="Label2">Board Height</div>
+            <div class="Value2">
+                <input type="number" @bind="startOptions.Width" />
+            </div>
+            <div class="Label3">Number of Armies</div>
+            <div class="Value3">
+                <input type="number" @bind="startOptions.StartingArmiesPerPlayer" />
+            </div>
+        </div>
+    }
+    @if (Status == null || (Status.GameState != GameState.Deploying && Status.GameState != GameState.Attacking))
+    {
+        <button @onclick="StartGameAsync">@actionButtonText</button>
+    }
 </div>
 
 
@@ -85,6 +106,12 @@
 
 
 @code{
+    public GameStartOptions startOptions = new GameStartOptions()
+    {
+        Height = 12,
+        Width = 12,
+        StartingArmiesPerPlayer = 50
+    };
     public string actionButtonText = "Start Game";
     public string ServerAddress { get; set; } = "localhost:5000";
     private HubConnection hubConnection;
@@ -123,11 +150,8 @@
         hubConnection.On<GameStatus>(MessageTypes.SendStatus, status =>
         {
             Status = status;
-            if (MaxRow == 0)
-            {
-                MaxRow = status.Board.Max(t => t.Location.Row);
-                MaxCol = status.Board.Max(t => t.Location.Column);
-            }
+            MaxRow = status.Board.Max(t => t.Location.Row);
+            MaxCol = status.Board.Max(t => t.Location.Column);
             if(Status.GameState == GameState.GameOver)
             {
                 actionButtonText = "Restart Game";
@@ -177,15 +201,11 @@
 
     async Task StartGameAsync()
     {
-        if (Status == null || Status.GameState == GameState.Joining)
+        if (Status == null || Status.GameState == GameState.Joining || Status.GameState == GameState.GameOver)
         {
-            await hubConnection.SendAsync(MessageTypes.StartGame, secretCode);
+            await hubConnection.SendAsync(MessageTypes.RestartGame, secretCode, startOptions);
             actionButtonText = "Game in progress...";
             StateHasChanged();
-        }
-        else if(Status.GameState == GameState.GameOver)
-        {
-            await hubConnection.SendAsync(MessageTypes.RestartGame, secretCode);
         }
     }
 
