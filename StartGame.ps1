@@ -1,4 +1,4 @@
-write-host "Starting up risk server" -foregroundcolor green
+write-host "Looking for an available port..." -foregroundcolor green
 $serverport = 5000
 
 while((test-netconnection localhost -port $serverport -WarningAction SilentlyContinue).TcpTestSucceeded){
@@ -6,20 +6,15 @@ while((test-netconnection localhost -port $serverport -WarningAction SilentlyCon
 	$serverport++
 }
 
-start-process ./risk.server.exe -argumentlist "--StartGameCode", "banana55", "--urls", "http://localhost:$serverport"
+write-host "Starting risk server on port $serverport" -foregroundcolor green
+start-process dotnet -argumentlist "run", "--project", "./Risk.Server", "--urls", "http://localhost:$serverport"
 
-write-host "Starting up risk web-based competitor (it has the start game button)" -foregroundcolor green
-$sampleclientport = 5005
+write-host "Sleeping for 10 seconds while server spins up..." -foregroundcolor green
+start-sleep -Seconds 10
 
-while((test-netconnection localhost -port $sampleclientport -WarningAction SilentlyContinue).TcpTestSucceeded){
-	write-host "Port $sampleclientport is in use, trying next port"
-	$sampleclientport++
-}
-
-start-process dotnet -argumentlist "run", "--project",  ".\Runner\Risk.Signalr.SampleClient.csproj", "--playerName", "Sample Opponent", "--ServerAddress", "http://localhost:$serverport", "--urls", "http://localhost:$sampleclientport"
-start-sleep 5
-start-process "http://localhost:$sampleclientport/localhost:$serverport"
+write-host "Opening up a browser at http://localhost:$serverport" -foregroundcolor green
+start-process "http://localhost:$serverport"
 
 write-host "Starting up console-based competitor (you)`n`n`n" -foregroundcolor green
-dotnet run --project ./YourCode "http://localhost:$serverport" 
+dotnet run --project ./YourCode "http://localhost:$serverport"
 
