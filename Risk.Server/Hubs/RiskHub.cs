@@ -73,6 +73,21 @@ namespace Risk.Server.Hubs
             await Clients.Client(Context.ConnectionId).SendStatus(game.GetGameStatus());
         }
 
+        public async Task RestartGame(string password)
+        {
+            if(password == config["StartGameCode"])
+            {
+                await BroadCastMessage("Restarting game...");
+                game.RestartGame();
+                await StartDeployPhase();
+                await Clients.All.SendStatus(game.GetGameStatus());
+            }
+            else
+            {
+                await Clients.Client(Context.ConnectionId).SendMessage("Server", "Incorrect password.");
+            }
+        }
+
         public async Task StartGame(string Password)
         {
             if (Password == config["StartGameCode"])
@@ -244,7 +259,7 @@ namespace Risk.Server.Hubs
                 badPlayer.InvalidRequests++;
                 await Clients.Client(badPlayer.Token).SendMessage("Server", "It's not your turn");
             }
-        }       
+        }
 
         public async Task AttackComplete()
         {

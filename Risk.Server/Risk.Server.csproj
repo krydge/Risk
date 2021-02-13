@@ -8,12 +8,18 @@
 
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="5.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Risk.Game\Risk.Game.csproj" />
     <ProjectReference Include="..\Risk.Shared\Risk.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\sample-data\" />
   </ItemGroup>
 
 </Project>

@@ -19,6 +19,6 @@ namespace Risk.Shared
         public const string YourTurnToAttack = "YourTurnToAttack";
         public const string AttackComplete = "AttackComplete";
         public const string JoinConfirmation = "JoinConfirmation";
-
+        public const string RestartGame = "RestartGame";
     }
 }

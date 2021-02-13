@@ -14,9 +14,12 @@ namespace Risk.Game
             StartingArmies = startOptions.StartingArmiesPerPlayer;
             gameState = GameState.Initializing;
             playerDictionary = new ConcurrentDictionary<string, IPlayer>();
+            this.startOptions = startOptions;
         }
         public IPlayer CurrentPlayer { get; set; }
         private readonly ConcurrentDictionary<string, IPlayer> playerDictionary;
+        private readonly GameStartOptions startOptions;
+
         public IEnumerable<IPlayer> Players => playerDictionary.Values;
 
         public int numberOfCardTurnIns = 1;
@@ -33,7 +36,7 @@ namespace Risk.Game
             throw new KeyNotFoundException($"Unable to locate player with token ${token} in list of players.");
         }
 
-        public Board Board { get; }
+        public Board Board { get; private set; }
         private GameState gameState { get; set; }
 
         public DateTime StartTime { get; set; }
@@ -59,6 +62,13 @@ namespace Risk.Game
         public void StartJoining()
         {
             gameState = GameState.Joining;
+        }
+
+        public void RestartGame()
+        {
+            gameState = GameState.Joining;
+            Board = new Board(createTerritories(startOptions.Height, startOptions.Width));
+            StartGame();
         }
 
         public void StartGame()

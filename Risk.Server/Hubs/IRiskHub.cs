@@ -18,5 +18,6 @@ namespace Risk.Server.Hubs
         Task YourTurnToDeploy(IEnumerable<BoardTerritory> currentBoard);
         Task YourTurnToAttack(IEnumerable<BoardTerritory> currentBoard);
         Task JoinConfirmation(string name);
+        Task RestartGame(string secretCode);
     }
 }

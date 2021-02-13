@@ -25,6 +25,8 @@ namespace Risk.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddServerSideBlazor();
+            services.AddRazorPages();
             services.AddSignalR();
             services.AddCors(options =>
             {
@@ -61,10 +63,14 @@ namespace Risk.Server
                         .AllowAnyHeader();
             });
 
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapBlazorHub();
+                endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapHub<RiskHub>("/riskhub");
             });
         }
