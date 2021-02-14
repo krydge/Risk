@@ -4,52 +4,36 @@ starter code for python client for signalr risk competition
 ## Getting Started
 
 ### Clone the repository
+
+First, clone the [coding challenge repository](https://github.com/SnowSE/risk_coding_challenge/tree/signalr):
+
 ```bash
-git clone https://github.com/SnowSE/risk-challenge-python-client
+git clone -n https://github.com/SnowSE/risk_coding_challenge && cd risk_coding_challenge && git checkout signalr
 ```
-### Install prerequisites
+
+### Start the server, visualizer and built-in player
+
+Before starting up a client, make sure that you have access to a running Risk Server on a known and accessible url and port: From the `Risk.Server` folder, run `dotnet run`.
+
+By default, you can access the visualizer (and add a built-in player to the game) via a webbrowser at [`http://localhost:5000`](http://localhost:5000) where you can also start the game.
+
+### Install the python client prerequisites
 The starter code depends on Python 3.7+ with pip installed.
 
-Install dependencies via pip (`--user` is optional if you have write permissions to python installation):
+From a different terminal and while now from the `Risk.Signalr.PythonClient` folder of the repository, install python client dependencies via pip (`--user` is optional if you have write permissions to python installation):
 ```bash
 python -m pip install -r requirements.txt --user
 ```
 
-### Risk Server, Visualizer, and Sample Opponent
-
-#### Risk Server
-
-Before starting up a client, make sure that you have access to a running [Risk server](https://github.com/SnowSE/risk_coding_challenge/tree/signalr) on a known and accessible url and port. I successfully ran against this version of the server code ([github link](https://github.com/SnowSE/risk_coding_challenge/tree/aea14e909a5913d5e66ad20c76a0bce5c3768b28); requires [.net5](https://dotnet.microsoft.com/download)):
-
-```bash
-git clone -n https://github.com/SnowSE/risk_coding_challenge && cd risk_coding_challenge && git checkout aea14e909a5913d5e66ad20c76a0bce5c3768b28
-```
-
-Once you have the code and are in the folder:
-```bash
-dotnet run --project ./Risk.Server/Risk.Server.csproj --StartGameCode banana55 --urls http://localhost:5000
-```
-
-#### Visualizer Server and Sample Opponent
-From the same repository folder but in a separate terminal, I started the visualizer server (which also comes with a sample opponent) with the following commands:
-```bash
-dotnet run --project ./Risk.Signalr.SampleClient/Risk.Signalr.SampleClient.csproj --playerName "Sample Opponent" --ServerAddress http://localhost:5000 --urls http://localhost:5005
-```
-
-Assuming the ports specified above, you can access the visualizer via a webbrowser at the following url:
-
-`http://localhost:5005/localhost:5000`
-
-Accessing that page also adds another player to the game.
-
 ### Run the sample client
-From the python client project folder, run your sample client:
+To run the sample python client from the `Risk.Signalr.PythonClient` folder, run the following:
 
 ```bash
 python SampleRiskClient.py
 ```
 
 ## Modify the Client Strategy
+Now you can write your own!
 
 `SampleRiskClient.py` gives and example client that randomly deploys to a legal board position, flips a coin to decide whether to continue attacking, and randomly chooses from all legal attacks when attacking.
 
