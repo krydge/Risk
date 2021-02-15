@@ -71,6 +71,10 @@ namespace Risk.Game
 
         public void RestartGame(GameStartOptions startOptions)
         {
+            foreach(var p in playerDictionary.Values)
+            {
+                playerDictionary[p.Token].Strikes = 0;
+            }
             inititializeGame(startOptions);
             StartGame();
         }

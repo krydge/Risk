@@ -12,25 +12,36 @@ namespace Risk.Signalr.ConsoleClient
         public PlayerLogic(string playerName)
         {
             MyPlayerName = playerName;
+            sleepFrequency = rng.Next(5, 20);
         }
 
         public string MyPlayerName { get; set; }
         int turnNum = 0;
+        Random rng = new Random();
+        int sleepFrequency = 0;
 
         public Location WhereDoYouWantToDeploy(IEnumerable<BoardTerritory> board)
         {
-            if (turnNum++ % 5 == 0)
-            {
-                Console.WriteLine("Sleeping every 5th turn");
-                Thread.Sleep(TimeSpan.FromSeconds(3));
-            }
+            randomSleep();
 
             var myTerritory = board.FirstOrDefault(t => t.OwnerName == MyPlayerName) ?? board.Skip(board.Count() / 2).First(t => t.OwnerName == null);
             return myTerritory.Location;
         }
 
+        private void randomSleep()
+        {
+            if (turnNum++ % sleepFrequency == 0)
+            {
+                int secondsToSleep = rng.Next(0, 3);
+                Console.WriteLine($"Sleeping for {secondsToSleep}");
+                Thread.Sleep(TimeSpan.FromSeconds(secondsToSleep));
+            }
+        }
+
         public (Location to, Location from) WhereDoYouWantToAttack(IEnumerable<BoardTerritory> board)
         {
+            randomSleep();
+
             foreach (var myTerritory in board.Where(t => t.OwnerName == MyPlayerName).OrderByDescending(t => t.Armies))
             {
                 var myNeighbors = GetNeighbors(myTerritory, board);

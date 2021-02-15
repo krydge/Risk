@@ -151,6 +151,9 @@ namespace Risk.Server.Hubs
 
         public async Task DeployRequest(Location l)
         {
+            if (game.GameState == GameState.GameOver)
+                return;
+
             logger.LogInformation("Received DeployRequest from {connectionId}", Context.ConnectionId);
 
             if(Context.ConnectionId == currentPlayer.Token)
@@ -191,9 +194,7 @@ namespace Risk.Server.Hubs
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", "Did not deploy successfully");
                     await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
 
-                    cancellationTokenSource = new CancellationTokenSource();
-                    var token = cancellationTokenSource.Token;
-                    ThreadPool.QueueUserWorkItem(token => timeoutCallback((CancellationToken)token), token);
+                    startTimeoutCountdown();
                 }
             }
             else
@@ -208,6 +209,9 @@ namespace Risk.Server.Hubs
 
         private async Task tellNextPlayerToDeploy()
         {
+            if (game.GameState == GameState.GameOver)
+                return;
+
             var players = game.Players.ToList();
             var currentPlayerIndex = players.IndexOf(game.CurrentPlayer);
             var nextPlayerIndex = currentPlayerIndex + 1;
@@ -226,9 +230,7 @@ namespace Risk.Server.Hubs
             game.CurrentPlayer = players[nextPlayerIndex];
             await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
 
-            cancellationTokenSource = new CancellationTokenSource();
-            var token = cancellationTokenSource.Token;
-            ThreadPool.QueueUserWorkItem(token => timeoutCallback((CancellationToken)token), token);
+            startTimeoutCountdown();
         }
 
         private async Task StartAttackPhase()
@@ -240,6 +242,9 @@ namespace Risk.Server.Hubs
 
         public async Task AttackRequest(Location from, Location to)
         {
+            if (game.GameState == GameState.GameOver)
+                return;
+
             if (Context.ConnectionId == currentPlayer.Token)
             {
                 game.OutstandingAttackRequestCount--;
@@ -280,6 +285,7 @@ namespace Risk.Server.Hubs
                             logger.LogError($"Invalid attack request! {currentPlayer.Name} from {attackingTerritory} to {defendingTerritory}.  You now have {currentPlayer.Strikes} strike(s)!");
                             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
 
+                            startTimeoutCountdown();
                         }
                         else
                         {
@@ -323,6 +329,9 @@ namespace Risk.Server.Hubs
 
         public async Task AttackComplete()
         {
+            if (game.GameState == GameState.GameOver)
+                return;
+
             if (game.Players.Count() > 1 && game.GameState == GameState.Attacking && game.Players.Any(p => game.PlayerCanAttack(p)))
                 await tellNextPlayerToAttack();
             else
@@ -331,6 +340,9 @@ namespace Risk.Server.Hubs
 
         private async Task tellNextPlayerToAttack()
         {
+            if (game.GameState == GameState.GameOver)
+                return;
+
             var players = game.Players.ToList();
             if (game.OutstandingAttackRequestCount >= players.Count * Game.Game.MaxTimesAPlayerCanNotAttack)
             {
@@ -345,7 +357,7 @@ namespace Risk.Server.Hubs
             {
                 nextPlayerIndex = 0;
             }
-            if(players.Count <= nextPlayerIndex)
+            if (players.Count <= nextPlayerIndex)
             {
                 logger.LogWarning("What happened to all the players?!");
                 await sendGameOverAsync();
@@ -354,6 +366,14 @@ namespace Risk.Server.Hubs
 
             game.CurrentPlayer = players[nextPlayerIndex];
             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
+            startTimeoutCountdown();
+        }
+
+        private void startTimeoutCountdown()
+        {
+            cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+            ThreadPool.QueueUserWorkItem(token => timeoutCallback((CancellationToken)token), token);
         }
 
         private async Task sendGameOverAsync()
