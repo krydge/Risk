@@ -51,6 +51,7 @@
             <thead>
                 <tr>
                     <th>Player Name</th>
+                    <th>Strikes</th>
                     <th>Territories</th>
                     <th>Armies</th>
                     <th>Score</th>
@@ -59,10 +60,11 @@
             @foreach (var p in Status.PlayerStats.OrderByDescending(p => p.Score))
             {
                 <tr style="@($" background-color:{ColorGenerator.GetColor(p.Name)}")">
-                    <td>@p.Name (@p.Strikes strikes) </td>
-                    <td>@p.Territories</td>
-                    <td>@p.Armies</td>
-                    <td>@p.Score</td>
+                    <td>@p.Name</td>
+                    <td style="text-align: right">@p.Strikes</td>
+                    <td style="text-align: right">@p.Territories</td>
+                    <td style="text-align: right">@p.Armies</td>
+                    <td style="text-align: right">@p.Score.ToString("n0")</td>
                 </tr>
             }
         </table>

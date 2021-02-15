@@ -51,8 +51,9 @@ a, .btn-link {
 
 .location {
     font-size: 10pt;
-    width: 48%;
     float: left;
+    margin-top: -10px;
+    margin-left: -8px;
 }
 
 .name {
@@ -63,8 +64,6 @@ a, .btn-link {
 .armies {
     color: red;
     font-weight: bold;
-    width: 48%;
-    float: right;
     text-align: right;
 }
 

@@ -117,6 +117,12 @@ namespace Risk.Server.Hubs
         {
             if(password == config["StartGameCode"])
             {
+                if(game.Players.Count() == 0)
+                {
+                    await BroadCastMessageAsync("No players connected.  Unable to restart.");
+                    return;
+                }
+
                 await BroadCastMessageAsync("Restarting game...");
                 game.RestartGame(startOptions);
                 await StartDeployPhase();
@@ -161,6 +167,11 @@ namespace Risk.Server.Hubs
                 cancellationTokenSource.Cancel();
                 if(currentPlayer.Strikes >= MaxFailedTries)
                 {
+                    if(game.Players.Count() == 1)
+                    {
+                        await sendGameOverAsync();
+                        return;
+                    }
                     logger.LogInformation("{0} has too many strikes.  Booting from game.", currentPlayer.Name);
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", "Too many bad requests. No risk for you");
                     game.RemovePlayerByToken(currentPlayer.Token);
@@ -251,6 +262,11 @@ namespace Risk.Server.Hubs
 
                 if (currentPlayer.Strikes >= MaxFailedTries)
                 {
+                    if (game.Players.Count() == 1)
+                    {
+                        await sendGameOverAsync();
+                        return;
+                    }
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Too many bad requests. No risk for you");
                     game.RemovePlayerByToken(currentPlayer.Token);
                     game.RemovePlayerFromBoard(currentPlayer.Token);
