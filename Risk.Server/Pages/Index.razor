@@ -58,8 +58,8 @@
             </thead>
             @foreach (var p in Status.PlayerStats.OrderByDescending(p => p.Score))
             {
-                <tr>
-                    <td>@p.Name</td>
+                <tr style="@($" background-color:{ColorGenerator.GetColor(p.Name)}")">
+                    <td>@p.Name (@p.Strikes strikes) </td>
                     <td>@p.Territories</td>
                     <td>@p.Armies</td>
                     <td>@p.Score</td>
@@ -68,7 +68,7 @@
         </table>
     </div>
 
-    <div class="grid-container">
+    <div class="board-grid-container">
         <table border="1px" cellpadding="10px">
             @for (var row = 0; row <= MaxRow; row++)
             {
@@ -77,13 +77,12 @@
                     {
                         var cell = Status.Board.First(t => t.Location == new Location(row, col));
                         var style = (MarkupString)(string.IsNullOrEmpty(cell.OwnerName)
-                            ? string.Empty
-                            : $"background-color:{ColorGenerator.GetColor(cell.OwnerName)}");
+                                   ? string.Empty
+                                   : $"background-color:{ColorGenerator.GetColor(cell.OwnerName)}");
 
                         <td class="cell" style="@style">
                             <div class="location">@cell.Location</div>
                             <div class="armies">@cell.Armies</div>
-                            <div class="name">@cell.OwnerName</div>
                         </td>
                     }
                 </tr>
@@ -152,11 +151,11 @@
             Status = status;
             MaxRow = status.Board.Max(t => t.Location.Row);
             MaxCol = status.Board.Max(t => t.Location.Column);
-            if(Status.GameState == GameState.GameOver)
+            if (Status.GameState == GameState.GameOver)
             {
                 actionButtonText = "Restart Game";
             }
-            else if(Status.GameState == GameState.Joining)
+            else if (Status.GameState == GameState.Joining)
             {
                 actionButtonText = "Start Game";
             }
@@ -184,7 +183,7 @@
 
         await hubConnection.StartAsync();
         logMessages += "My connection id is " + hubConnection.ConnectionId;
-        if(config["PlayerName"] != null)
+        if (config["PlayerName"] != null)
         {
             userInput = config["PlayerName"];
             await SignupAsync();

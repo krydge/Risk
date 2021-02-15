@@ -134,7 +134,7 @@ namespace Risk.Game
         {
             foreach (Territory territory in Board.Territories)
             {
-                if (territory.Owner == GetPlayer(token))
+                if (territory.Owner?.Token == token)
                 {
                     territory.Owner = null;
                     territory.Armies = 0;
@@ -191,6 +191,7 @@ namespace Risk.Game
                               let territoryCount = territories.Count()
                               select new PlayerStats {
                                   Name = p.Name,
+                                  Strikes = p.Strikes,
                                   Armies = armies,
                                   Territories = territoryCount,
                                   Score = armies + (territoryCount * 2)

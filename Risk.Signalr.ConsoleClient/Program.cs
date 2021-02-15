@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Risk.Shared;
 using System;
 using System.Collections.Generic;
@@ -10,17 +12,27 @@ namespace Risk.Signalr.ConsoleClient
     {
         static HubConnection hubConnection;
         private static PlayerLogic playerLogic;
+        private static IConfiguration config;
+
+        static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args);
 
         static async Task Main(string[] args)
         {
-            Console.WriteLine("What is your player name?");
-            var playerName = Console.ReadLine();
+            using IHost host = CreateHostBuilder(args).Build();
+            config = host.Services.GetService(typeof(IConfiguration)) as IConfiguration ?? throw new Exception("Unable to load configuration");
+            //await host.RunAsync();
 
-            var serverAddress = "http://localhost:5000";
-            if(args.Length == 1)
+            Console.WriteLine("What is your player name?");
+            var playerName = config["playerName"] switch
             {
-                serverAddress = args[0];
-            }
+                null => Console.ReadLine(),
+                string name => name
+            };
+            Console.WriteLine("Hello {0}!", playerName);
+
+
+            var serverAddress = config["serverAddress"] ?? "http://localhost:5000";
             Console.WriteLine($"Talking to the server at {serverAddress}");
 
             hubConnection = new HubConnectionBuilder()
@@ -49,6 +61,8 @@ namespace Risk.Signalr.ConsoleClient
                 }
 
             });
+
+            hubConnection.On<string, string>(MessageTypes.SendMessage, (from, message) => Console.WriteLine("From {0}: {1}", from, message));
 
             hubConnection.On<string>(MessageTypes.JoinConfirmation, validatedName => {
 

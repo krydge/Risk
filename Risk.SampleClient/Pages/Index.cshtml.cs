@@ -38,15 +38,5 @@ namespace Risk.SampleClient.Pages
             MaxRow = Status.Board.Max(t => t.Location.Row);
             MaxCol = Status.Board.Max(t => t.Location.Column);
         }
-
-        public async Task<IActionResult> OnPostStartGameAsync()
-        {
-            var client = httpClientFactory.CreateClient();
-            //Task.Run(()=>
-            //    client.PostAsJsonAsync($"{configuration["GameServer"]}/startgame", new StartGameRequest { SecretCode = configuration["secretCode"] })
-
-            //);            
-            return new RedirectToPageResult("Index");
-        }
     }
 }

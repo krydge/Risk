@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Risk.Game;
 using Microsoft.Extensions.Configuration;
 using Risk.Shared;
+using System.Threading;
 
 namespace Risk.Server.Hubs
 {
@@ -15,16 +16,48 @@ namespace Risk.Server.Hubs
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
         public const int MaxFailedTries = 5;
-
+        public const int TimeoutInSeconds = 2;
         private Player currentPlayer => (game.CurrentPlayer as Player);
-
         private Risk.Game.Game game { get; set; }
+
+        private CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
         public RiskHub(ILogger<RiskHub> logger, IConfiguration config, Game.Game game)
         {
             this.logger = logger;
             this.config = config;
             this.game = game;
         }
+
+        private async void timeoutCallback(CancellationToken cancellationToken)
+        {
+            logger.LogInformation("timeoutCallback begins");
+            for (int i = 0; i < TimeoutInSeconds * 1_000; i += 100)
+            {
+                Thread.Sleep(100);
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    logger.LogInformation("Cancellation requested while sleeping - don't sleep any more!");
+                    break;
+                }
+                logger.LogInformation("Cancellation not requested...sleeping a bit more.");
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                logger.LogInformation("Cancellation requested, _NOT_ penalizing current player.");
+                return;
+            }
+
+            currentPlayer.Strikes++;
+            logger.LogInformation("Boo on you {0}, you took too long to {1}.  One more strike!  You now have {2} strike(s)!", currentPlayer.Name, game.GameState, currentPlayer.Strikes);
+            await Clients.Client(currentPlayer.Token).SendMessage("Server", $"You took too long to {game.GameState}, you now have {currentPlayer.Strikes} strike(s).");
+            if (game.GameState == GameState.Deploying)
+                await tellNextPlayerToDeploy();
+            else
+                await tellNextPlayerToAttack();
+        }
+
         public override async Task OnConnectedAsync()
         {
             logger.LogInformation(Context.ConnectionId);
@@ -49,7 +82,7 @@ namespace Risk.Server.Hubs
             if(duplicatePlayer != null)
             {
                 await Clients.Client(duplicatePlayer.Token).SendMessage("Server", $"There is already a player registered on your client named {duplicatePlayer.Name}");
-                (duplicatePlayer as Player).InvalidRequests++;
+                (duplicatePlayer as Player).Strikes++;
             }
             else
             {
@@ -60,7 +93,7 @@ namespace Risk.Server.Hubs
                     user = string.Concat(baseName, i.ToString());
                     i++;
                 }
-                logger.LogInformation(Context.ConnectionId.ToString() + ": " + user);
+                logger.LogInformation($"{Context.ConnectionId}: {user}");
                 var newPlayer = new Player(Context.ConnectionId, user);
                 game.AddPlayer(newPlayer);
                 await BroadCastMessageAsync(newPlayer.Name + " has joined the game");
@@ -108,6 +141,7 @@ namespace Risk.Server.Hubs
                 await Clients.Client(Context.ConnectionId).SendMessage("Server", "Incorrect password");
             }
         }
+
         private async Task StartDeployPhase()
         {
             game.CurrentPlayer = game.Players.First();
@@ -115,17 +149,17 @@ namespace Risk.Server.Hubs
             await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
         }
 
-
         public async Task DeployRequest(Location l)
         {
             logger.LogInformation("Received DeployRequest from {connectionId}", Context.ConnectionId);
 
             if(Context.ConnectionId == currentPlayer.Token)
             {
-                if(currentPlayer.InvalidRequests >= MaxFailedTries)
+                cancellationTokenSource.Cancel();
+                if(currentPlayer.Strikes >= MaxFailedTries)
                 {
-                    logger.LogInformation("{currentPlayer} has too many invalid requests.  Booting from game.", currentPlayer);
-                    await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Too many bad requests. No risk for you");
+                    logger.LogInformation("{0} has too many strikes.  Booting from game.", currentPlayer.Name);
+                    await Clients.Client(Context.ConnectionId).SendMessage("Server", "Too many bad requests. No risk for you");
                     game.RemovePlayerByToken(currentPlayer.Token);
                     game.RemovePlayerFromBoard(currentPlayer.Token);
                     await tellNextPlayerToDeploy();
@@ -151,18 +185,24 @@ namespace Risk.Server.Hubs
                 }
                 else
                 {
-                    logger.LogInformation("{currentPlayer} tried to deploy at {l} but deploy failed.  Increasing invalid requests.", currentPlayer, l);
+                    currentPlayer.Strikes++;
+                    logger.LogInformation("{currentPlayer} tried to deploy at {l} but deploy failed.  Increasing strikes.  You now have {strikes} strikes!",
+                        currentPlayer.Name, l, currentPlayer.Strikes);
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", "Did not deploy successfully");
-                    currentPlayer.InvalidRequests++;
                     await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
+
+                    cancellationTokenSource = new CancellationTokenSource();
+                    var token = cancellationTokenSource.Token;
+                    ThreadPool.QueueUserWorkItem(token => timeoutCallback((CancellationToken)token), token);
                 }
             }
             else
             {
                 var badPlayer = game.Players.Single(p => p.Token == Context.ConnectionId) as Player;
-                badPlayer.InvalidRequests++;
+                badPlayer.Strikes++;
                 await Clients.Client(badPlayer.Token).SendMessage("Server", "It's not your turn");
-                logger.LogInformation("{currentPlayer} tried to deploy when it wasn't their turn.  Increading invalid request count.", currentPlayer);
+                logger.LogInformation("{badPlayer} tried to deploy when it wasn't their turn.  Increasing invalid request count.  You now have {strikes} strikes!",
+                    badPlayer.Name, badPlayer.Strikes);
             }
         }
 
@@ -175,8 +215,20 @@ namespace Risk.Server.Hubs
             {
                 nextPlayerIndex = 0;
             }
+
+            if(players.Count <= nextPlayerIndex)
+            {
+                logger.LogWarning("What happened to all the players?!");
+                await sendGameOverAsync();
+                return;
+            }
+
             game.CurrentPlayer = players[nextPlayerIndex];
             await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
+
+            cancellationTokenSource = new CancellationTokenSource();
+            var token = cancellationTokenSource.Token;
+            ThreadPool.QueueUserWorkItem(token => timeoutCallback((CancellationToken)token), token);
         }
 
         private async Task StartAttackPhase()
@@ -192,7 +244,7 @@ namespace Risk.Server.Hubs
             {
                 game.OutstandingAttackRequestCount--;
 
-                if (currentPlayer.InvalidRequests >= MaxFailedTries)
+                if (currentPlayer.Strikes >= MaxFailedTries)
                 {
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Too many bad requests. No risk for you");
                     game.RemovePlayerByToken(currentPlayer.Token);
@@ -224,8 +276,8 @@ namespace Risk.Server.Hubs
                         }
                         if (attackResult.AttackInvalid)
                         {
-                            logger.LogError($"Invalid attack request! {currentPlayer.Name} from {attackingTerritory} to {defendingTerritory} ");
-                            currentPlayer.InvalidRequests++;
+                            currentPlayer.Strikes++;
+                            logger.LogError($"Invalid attack request! {currentPlayer.Name} from {attackingTerritory} to {defendingTerritory}.  You now have {currentPlayer.Strikes} strike(s)!");
                             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
 
                         }
@@ -251,7 +303,7 @@ namespace Risk.Server.Hubs
                     else
                     {
                         await Clients.Client(currentPlayer.Token).SendMessage("Server", "You are unable to attack.  Moving to next player.");
-                        logger.LogInformation("Player {currentPlayer} cannot attack.", currentPlayer);
+                        logger.LogInformation("Player {currentPlayer} cannot attack.", currentPlayer.Name);
                         await tellNextPlayerToAttack();
                     }
                 }
@@ -263,7 +315,8 @@ namespace Risk.Server.Hubs
             else
             {
                 var badPlayer = game.Players.Single(p => p.Token == Context.ConnectionId) as Player;
-                badPlayer.InvalidRequests++;
+                badPlayer.Strikes++;
+                logger.LogInformation("Player {currentPlayer} tried to play when it's not their turn.  You now have {strikes} strikes!", badPlayer.Name, badPlayer.Strikes);
                 await Clients.Client(badPlayer.Token).SendMessage("Server", "It's not your turn");
             }
         }
@@ -281,7 +334,7 @@ namespace Risk.Server.Hubs
             var players = game.Players.ToList();
             if (game.OutstandingAttackRequestCount >= players.Count * Game.Game.MaxTimesAPlayerCanNotAttack)
             {
-                logger.LogInformation("Too many plays skipped attacking, ending game");
+                logger.LogInformation("Too many players skipped attacking, ending game.");
                 await sendGameOverAsync();
                 return;
             }
@@ -292,6 +345,13 @@ namespace Risk.Server.Hubs
             {
                 nextPlayerIndex = 0;
             }
+            if(players.Count <= nextPlayerIndex)
+            {
+                logger.LogWarning("What happened to all the players?!");
+                await sendGameOverAsync();
+                return;
+            }
+
             game.CurrentPlayer = players[nextPlayerIndex];
             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
         }

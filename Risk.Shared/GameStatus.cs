@@ -32,6 +32,7 @@ namespace Risk.Shared
     public class PlayerStats
     {
         public string Name { get; set; }
+        public int Strikes { get; set; }
         public int Armies { get; set; }
         public int Territories { get; set; }
         public int Score { get; set; }

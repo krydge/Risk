@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Risk.Signalr.ConsoleClient
@@ -14,9 +15,16 @@ namespace Risk.Signalr.ConsoleClient
         }
 
         public string MyPlayerName { get; set; }
+        int turnNum = 0;
 
         public Location WhereDoYouWantToDeploy(IEnumerable<BoardTerritory> board)
         {
+            if (turnNum++ % 5 == 0)
+            {
+                Console.WriteLine("Sleeping every 5th turn");
+                Thread.Sleep(TimeSpan.FromSeconds(3));
+            }
+
             var myTerritory = board.FirstOrDefault(t => t.OwnerName == MyPlayerName) ?? board.Skip(board.Count() / 2).First(t => t.OwnerName == null);
             return myTerritory.Location;
         }
