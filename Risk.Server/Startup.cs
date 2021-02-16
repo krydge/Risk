@@ -35,6 +35,7 @@ namespace Risk.Server
                     {
                         builder.AllowAnyHeader()
                                .AllowAnyMethod()
+                               // to allow browser clients: https://github.com/dotnet/aspnetcore/issues/4457#issuecomment-465669576
                                .SetIsOriginAllowed(host => true)
                                .AllowCredentials();
                     });
