@@ -102,8 +102,7 @@ class AbstractRiskClient(ABC):
     def handle_attack(self, dict_board: List[List[dict]]) -> None:
         print("handling attack...")
         board = board_from_dicts(*dict_board)
-        # looks like I'm getting invited to attack even when I have no valid attacks
-        if self.get_attacks(board) and self.should_attack(board):
+        if self.should_attack(board):
             attack = self.choose_attack(board)
             (source, target) = attack
             print(f"attempting to attack from {source} to {target}")
