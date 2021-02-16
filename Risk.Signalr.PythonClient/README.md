@@ -3,12 +3,12 @@ starter code for python client for signalr risk competition
 
 ## Getting Started
 
-### Clone the repository
+### Clone the repositorysi
 
-First, clone the [coding challenge repository](https://github.com/SnowSE/risk_coding_challenge/tree/signalr):
+First, clone the [coding challenge repository](https://github.com/SnowSE/risk_coding_challenge):
 
 ```bash
-git clone -n https://github.com/SnowSE/risk_coding_challenge && cd risk_coding_challenge && git checkout signalr
+git clone https://github.com/SnowSE/risk_coding_challenge
 ```
 
 ### Start the server, visualizer and built-in player
