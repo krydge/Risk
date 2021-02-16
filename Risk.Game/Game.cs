@@ -221,9 +221,17 @@ namespace Risk.Game
 
         public TryAttackResult TryAttack(string attackerToken, Territory attackingTerritory, Territory defendingTerritory, int seed = 0)
         {
-            if (canAttack(attackerToken, attackingTerritory, defendingTerritory) is false)
+            if(!AttackOwnershipValid(attackerToken, attackingTerritory.Location, defendingTerritory.Location))
             {
-                return new TryAttackResult { AttackInvalid = true };
+                return new TryAttackResult { AttackInvalid = true, Message = "You don't own the attacking territory." };
+            }
+            if(!EnoughArmiesToAttack(attackingTerritory))
+            {
+                return new TryAttackResult { AttackInvalid = true, Message = "You don't have enough armies to attack." };
+            }
+            if(!Board.AttackTargetLocationIsValid(attackingTerritory.Location, defendingTerritory.Location))
+            {
+                return new TryAttackResult { AttackInvalid = true, Message = "The defending territory is not valid." };
             }
 
             Random rand;
@@ -268,13 +276,6 @@ namespace Risk.Game
                 };
             }
             return new TryAttackResult { CanContinue = attackingTerritory.Armies > 1, AttackInvalid = false };
-        }
-
-        private bool canAttack(string attackerToken, Territory attackingTerritory, Territory defendingTerritory)
-        {
-            return AttackOwnershipValid(attackerToken, attackingTerritory.Location, defendingTerritory.Location)
-                 && EnoughArmiesToAttack(attackingTerritory)
-                 && Board.AttackTargetLocationIsValid(attackingTerritory.Location, defendingTerritory.Location);
         }
 
         public int GetNumTerritories(IPlayer player) => Board.Territories.Count(t => t.Owner == player);

@@ -7,11 +7,12 @@ using System.Threading.Tasks;
 
 namespace Risk.Signalr.ConsoleClient
 {
-    public class PlayerLogic
+    public class PlayerLogic : IPlayerLogic
     {
-        public PlayerLogic(string playerName)
+        public PlayerLogic(string playerName, bool shouldSleep)
         {
             MyPlayerName = playerName;
+            this.shouldSleep = shouldSleep;
             sleepFrequency = rng.Next(5, 20);
         }
 
@@ -19,6 +20,7 @@ namespace Risk.Signalr.ConsoleClient
         int turnNum = 0;
         Random rng = new Random();
         int sleepFrequency = 0;
+        private readonly bool shouldSleep;
 
         public Location WhereDoYouWantToDeploy(IEnumerable<BoardTerritory> board)
         {
@@ -30,6 +32,9 @@ namespace Risk.Signalr.ConsoleClient
 
         private void randomSleep()
         {
+            if (!shouldSleep)
+                return;
+
             if (turnNum++ % sleepFrequency == 0)
             {
                 int secondsToSleep = rng.Next(0, 3);
@@ -38,7 +43,7 @@ namespace Risk.Signalr.ConsoleClient
             }
         }
 
-        public (Location to, Location from) WhereDoYouWantToAttack(IEnumerable<BoardTerritory> board)
+        public (Location from, Location to) WhereDoYouWantToAttack(IEnumerable<BoardTerritory> board)
         {
             randomSleep();
 

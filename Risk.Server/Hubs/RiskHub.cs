@@ -49,6 +49,12 @@ namespace Risk.Server.Hubs
                 return;
             }
 
+            if(game.GameState == GameState.GameOver)
+            {
+                logger.LogInformation("The game is over, so it doesn't really matter that {currentPlayerName} timed out.", currentPlayer.Name);
+                return;
+            }
+
             currentPlayer.Strikes++;
             logger.LogInformation("Boo on you {0}, you took too long to {1}.  One more strike!  You now have {2} strike(s)!", currentPlayer.Name, game.GameState, currentPlayer.Strikes);
             await Clients.Client(currentPlayer.Token).SendMessage("Server", $"You took too long to {game.GameState}, you now have {currentPlayer.Strikes} strike(s).");
@@ -299,6 +305,7 @@ namespace Risk.Server.Hubs
                         {
                             currentPlayer.Strikes++;
                             logger.LogError($"Invalid attack request! {currentPlayer.Name} from {attackingTerritory} to {defendingTerritory}.  You now have {currentPlayer.Strikes} strike(s)!");
+                            await Clients.Client(currentPlayer.Token).SendMessage("Server", $"Invalid attack request: {attackResult.Message} :(  You now have {currentPlayer.Strikes} strike(s)!");
                             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
 
                             startTimeoutCountdown();
