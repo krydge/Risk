@@ -33,9 +33,10 @@ namespace Risk.Server
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.AllowAnyOrigin()
+                        builder.AllowAnyHeader()
                                .AllowAnyMethod()
-                               .AllowAnyHeader();
+                               .SetIsOriginAllowed(host => true)
+                               .AllowCredentials();
                     });
             });
 
@@ -56,12 +57,7 @@ namespace Risk.Server
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader();
-            });
+            app.UseCors();
 
             app.UseStaticFiles();
 
