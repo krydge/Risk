@@ -136,27 +136,3 @@ class AbstractRiskClient {
         });
     }
 }
-
-class MyRiskClient extends AbstractRiskClient {
-
-    // returns the position of where the next army should be deployed
-    choose_deploy(board) {
-        console.log(this.get_deployable(board));
-        return _.sample(this.get_deployable(board)).location;
-    }
-
-    // returns whether this player should attack given the current board
-    should_attack(board) {
-        return true;
-        // return _.sample([true, false]);
-    }
-
-    // returns the source and target of attack
-    choose_attack(board) {
-        console.log(this.get_attacks(board));
-        let [source, target] = _.sample(this.get_attacks(board));
-        return [source.location, target.location];
-    }
-
-}
-new MyRiskClient().start();
