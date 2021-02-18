@@ -26,7 +26,7 @@ namespace Risk.Signalr.CS1400Client
 
         static async Task Main(string[] args)
         {
-            var playerName = "CS1400 Client";
+            var playerName = PlayerLogic.WhatIsYourName();
             var serverAddress = "http://localhost:5000";
             if(args.Length == 1)
             {
