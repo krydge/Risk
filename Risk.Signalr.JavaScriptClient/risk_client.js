@@ -147,8 +147,8 @@ class MyRiskClient extends AbstractRiskClient {
 
     // returns whether this player should attack given the current board
     should_attack(board) {
-        return true;
-        // return _.sample([true, false]);
+        //return true;
+        return _.sample([true, false]);
     }
 
     // returns the source and target of attack
