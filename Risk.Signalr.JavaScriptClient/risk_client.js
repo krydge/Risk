@@ -55,12 +55,13 @@ class AbstractRiskClient {
         return board.filter(is_neighbor);
     }
 
-    // returns all possible attacks: (srouce, dest) territory pairs
+    // returns all possible attacks: (source, dest) territory pairs
     get_attacks(board) {
         console.log("attacking...");
         return this.get_mine(board)
             .filter(src => src.armies > 1)                   // can only attack with > 1
             .flatMap(src => this.get_neighbors(src, board)   // get neighbors
+                .filter(tgt => tgt.ownerName !== this.name)  // skip my own lands
                 .map(tgt => [src, tgt]))                     // return pairs
     }
 
@@ -76,7 +77,7 @@ class AbstractRiskClient {
 
     // returns a list of player's territories
     get_mine(board) {
-        return board.filter(t => t.ownerName == this.name);
+        return board.filter(t => t.ownerName === this.name);
     }
 
     // ## Handlers ##
@@ -84,17 +85,17 @@ class AbstractRiskClient {
     handle_deploy(board) {
         console.log("handling deploy...");
         let deploy_location = this.choose_deploy(board);
-        console.log(`attempting to deploy to ${deploy_location}`);
+        console.log(`attempting to deploy to ${JSON.stringify(deploy_location)}`);
         this.connection.send(this.MessageTypes.DeployRequest, deploy_location);
     }
 
     handle_attack(board) {
         console.log("handling attack...")
         // it looked like I was getting invited to attack even when I had no valid attacks
-        if (this.get_attacks(board).length > 0 && this.should_attack(board)) {
+        if (this.should_attack(board)) {
             let attack = this.choose_attack(board);
             let [source, target] = attack;
-            console.log(`attempting to attack from ${source} to ${target}`);
+            console.log(`attempting to attack from ${JSON.stringify(source)} to ${JSON.stringify(target)}`);
             this.connection.send(this.MessageTypes.AttackRequest, source, target);
         } else {
             console.log("done attacking");
@@ -137,26 +138,3 @@ class AbstractRiskClient {
     }
 }
 
-class MyRiskClient extends AbstractRiskClient {
-
-    // returns the position of where the next army should be deployed
-    choose_deploy(board) {
-        console.log(this.get_deployable(board));
-        return _.sample(this.get_deployable(board)).location;
-    }
-
-    // returns whether this player should attack given the current board
-    should_attack(board) {
-        //return true;
-        return _.sample([true, false]);
-    }
-
-    // returns the source and target of attack
-    choose_attack(board) {
-        console.log(this.get_attacks(board));
-        let [source, target] = _.sample(this.get_attacks(board));
-        return [source.location, target.location];
-    }
-
-}
-new MyRiskClient().start();

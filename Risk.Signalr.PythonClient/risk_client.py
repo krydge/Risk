@@ -75,7 +75,7 @@ class AbstractRiskClient(ABC):
             (src, tgt)
             for src in self.get_mine(board)
             for tgt in self.get_neighbors(src, board)
-            if src.armies > 1]
+            if src.armies > 1 and tgt.ownerName != self.name]
 
     def get_deployable(self, board: Board) -> Sequence[BoardTerritory]:
         """get locations that are legal for deploying an army"""
@@ -110,7 +110,7 @@ class AbstractRiskClient(ABC):
                                                               Location.Schema().dump(target)])
         else:
             print("done attacking")
-            self.connection.send(MessageTypes.AttackComplete)
+            self.connection.send(MessageTypes.AttackComplete, [])
 
     def handle_join(self, name: List[str]) -> None:
         """saves the name assigned by the server"""
