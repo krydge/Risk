@@ -114,12 +114,12 @@
         StartingArmiesPerPlayer = 50
     };
     public string actionButtonText = "Start Game";
-    public string ServerAddress { get; set; } = "localhost:5000";
+    public string ServerAddress { get; set; }
     private HubConnection hubConnection;
     private List<string> messages = new List<string>();
     private string userInput;
     private string logMessages;
-    private string secretCode = "banana55";
+    private string secretCode;
     private GameStatus Status;
     private PlayerLogic playerLogic;
     private int MaxRow = 0;
@@ -127,6 +127,9 @@
 
     protected override async Task OnInitializedAsync()
     {
+        ServerAddress = config["serverAddress"] ?? "localhost:5000";
+        secretCode = config["secretCode"] ?? "banana55";
+
         hubConnection = new HubConnectionBuilder()
             .WithUrl("http://" + ServerAddress + "/riskhub")
             .ConfigureLogging(logBuilder =>
