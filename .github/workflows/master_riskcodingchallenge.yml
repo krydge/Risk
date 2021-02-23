@@ -22,9 +22,7 @@ jobs:
         dotnet-version: '5.0.x'
 
     - name: Build with dotnet
-      run: 
-      - cd Risk.Server
-      - dotnet build --configuration Release
+      run: cd Risk.Server && dotnet build --configuration Release
 
     - name: dotnet publish
       run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
