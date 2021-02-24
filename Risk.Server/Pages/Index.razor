@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.Extensions.Logging;
 @using Microsoft.Extensions.Configuration
+@using MatBlazor
 @inject ILoggerProvider LoggerProvider
 @inject IConfiguration config
 
@@ -10,10 +11,11 @@
     {
         <input type="text" @bind="secretCode" />
         <button @onclick="SaveSecretCode">Save Secret Code</button>
+        <br/>
     }
     @if (playerLogic == null)
     {
-        <span>Input:</span><input type="text" @bind="userInput" /><br />
+        <span>Player Name:</span><input type="text" @bind="userInput" />
         <button @onclick="SignupAsync">Signup</button>
     }
     else
@@ -42,6 +44,7 @@
     @if (Status == null || (Status.GameState != GameState.Deploying && Status.GameState != GameState.Attacking))
     {
         <button @onclick="StartGameAsync">@actionButtonText</button>
+        <MatSlideToggle @bind-Value="@showLog"></MatSlideToggle><span>Show Log</span>
     }
 </div>
 
@@ -97,6 +100,8 @@
     </div>
 }
 
+@if(showLog)
+{
 <h5>List of Messages</h5>
 <ul>
     @foreach (var message in messages)
@@ -104,7 +109,7 @@
         <li>@message</li>
     }
 </ul>
-
+}
 
 
 
@@ -131,6 +136,7 @@
     private int MaxRow = 0;
     private int MaxCol = 0;
     private bool savedSecretCode = false;
+    private bool showLog = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -139,7 +145,7 @@
         {
             secretCode = "banana55";
         }
-        userInput = $"Connected to {ServerAddress}";
+        userInput = "Built-In";
 
         var connectionUrl = "http://" + ServerAddress;
         if(ServerAddress.Contains("https://"))
