@@ -75,7 +75,7 @@ namespace Risk.Signalr.ConsoleClient
 
             hubConnection.On<string>(MessageTypes.JoinConfirmation, validatedName => 
             {
-                if (config["useAlternate"] != "false")
+                if (config["useAlternate"] == "true")
                 {
                     playerLogic = new AlternateSampleLogic(validatedName);
                 }

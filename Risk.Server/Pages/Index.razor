@@ -9,7 +9,7 @@
 <div>
     @if(savedSecretCode == false)
     {
-        <input type="text" @bind="secretCode" />
+        <input type="text" @bind="secretCode" placeholder="secret code" />
         <button @onclick="SaveSecretCode">Save Secret Code</button>
         <br/>
     }
@@ -43,8 +43,7 @@
     }
     @if (Status == null || (Status.GameState != GameState.Deploying && Status.GameState != GameState.Attacking))
     {
-        <button @onclick="StartGameAsync">@actionButtonText</button>
-        <MatSlideToggle @bind-Value="@showLog"></MatSlideToggle><span>Show Log</span>
+        <MatButton Raised="true" OnClick="StartGameAsync">@actionButtonText</MatButton>
     }
 </div>
 
@@ -100,6 +99,7 @@
     </div>
 }
 
+<MatSlideToggle @bind-Value="@showLog"></MatSlideToggle><span>Show Log</span>
 @if(showLog)
 {
 <h5>List of Messages</h5>
@@ -110,9 +110,6 @@
     }
 </ul>
 }
-
-
-
 
 
 @code{
