@@ -6,11 +6,15 @@
 @inject IConfiguration config
 
 <div>
+    @if(savedSecretCode == false)
+    {
+        <input type="text" @bind="secretCode" />
+        <button @onclick="SaveSecretCode">Save Secret Code</button>
+    }
     @if (playerLogic == null)
     {
         <span>Input:</span><input type="text" @bind="userInput" /><br />
         <button @onclick="SignupAsync">Signup</button>
-        <input type="text" @bind="secretCode" />
     }
     else
     {
@@ -107,6 +111,8 @@
 
 
 @code{
+
+
     public GameStartOptions startOptions = new GameStartOptions()
     {
         Height = 12,
@@ -124,11 +130,15 @@
     private PlayerLogic playerLogic;
     private int MaxRow = 0;
     private int MaxCol = 0;
+    private bool savedSecretCode = false;
 
     protected override async Task OnInitializedAsync()
     {
         ServerAddress = config["serverAddress"] ?? "localhost:5000";
-        secretCode = config["secretCode"] ?? "banana55";
+        if(config["alwaysUseFreshSecretCode"] != "true")
+        {
+            secretCode = "banana55";
+        }
         userInput = $"Connected to {ServerAddress}";
 
         var connectionUrl = "http://" + ServerAddress;
@@ -192,13 +202,18 @@
         });
 
         await hubConnection.StartAsync();
-        
+
         logMessages += "My connection id is " + hubConnection.ConnectionId;
         if (config["PlayerName"] != null)
         {
             userInput = config["PlayerName"];
             await SignupAsync();
         }
+    }
+
+    public void SaveSecretCode()
+    {
+        savedSecretCode = true;
     }
 
     async Task SignupAsync()

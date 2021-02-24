@@ -69,7 +69,6 @@ namespace Risk.Signalr.ConsoleClient
                     Console.WriteLine("Yielding turn (nowhere left to attack)");
                     await AttackCompleteAsync();
                 }
-
             });
 
             hubConnection.On<string, string>(MessageTypes.SendMessage, (from, message) => Console.WriteLine("From {0}: {1}", from, message));
