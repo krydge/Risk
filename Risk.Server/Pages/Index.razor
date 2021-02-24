@@ -192,6 +192,7 @@
         });
 
         await hubConnection.StartAsync();
+        
         logMessages += "My connection id is " + hubConnection.ConnectionId;
         if (config["PlayerName"] != null)
         {
