@@ -11,6 +11,7 @@ namespace Risk.Shared
     {
         public IEnumerable<string> Players { get; set; }
         public Collection<PlayerStats> PlayerStats { get; set; }
+        public int StartingArmies { get; set; }
         public GameState GameState { get; set; }
         public IEnumerable<BoardTerritory> Board { get; set; }
 
@@ -20,12 +21,13 @@ namespace Risk.Shared
             PlayerStats = new Collection<PlayerStats>();
         }
 
-        public GameStatus(IEnumerable<string> players, GameState gameState, IEnumerable<BoardTerritory> board, IEnumerable<PlayerStats> playerStats )
+        public GameStatus(IEnumerable<string> players, GameState gameState, IEnumerable<BoardTerritory> board, IEnumerable<PlayerStats> playerStats, int startingArmies )
         {
             Players = players;
             GameState = gameState;
             Board = board;
             PlayerStats = new Collection<PlayerStats>(playerStats.ToList());
+            StartingArmies = startingArmies;
         }
     }
 

@@ -204,7 +204,7 @@ namespace Risk.Game
                                   Score = armies + (territoryCount * 2)
                               };
 
-            return new GameStatus(playerNames, GameState, Board.AsBoardTerritoryList(), playerStats);
+            return new GameStatus(playerNames, GameState, Board.AsBoardTerritoryList(), playerStats, StartingArmies);
         }
 
         public int GetNumPlacedArmies(IPlayer player)
