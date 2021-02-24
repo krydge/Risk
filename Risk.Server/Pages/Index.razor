@@ -131,8 +131,12 @@
         secretCode = config["secretCode"] ?? "banana55";
         userInput = $"Connected to {ServerAddress}";
 
+        var connectionUrl = "http://" + ServerAddress;
+        if(ServerAddress.Contains("https://"))
+            connectionUrl = ServerAddress;
+
         hubConnection = new HubConnectionBuilder()
-            .WithUrl("http://" + ServerAddress + "/riskhub")
+            .WithUrl(connectionUrl + "/riskhub")
             .ConfigureLogging(logBuilder =>
             {
                 logBuilder.AddDebug();
