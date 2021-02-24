@@ -129,6 +129,7 @@
     {
         ServerAddress = config["serverAddress"] ?? "localhost:5000";
         secretCode = config["secretCode"] ?? "banana55";
+        userInput = $"Connected to {ServerAddress}";
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl("http://" + ServerAddress + "/riskhub")
