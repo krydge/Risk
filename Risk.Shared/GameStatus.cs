@@ -29,6 +29,16 @@ namespace Risk.Shared
             PlayerStats = new Collection<PlayerStats>(playerStats.ToList());
             StartingArmies = startingArmies;
         }
+
+        public override string ToString()
+        {
+            var s = new StringBuilder();
+            foreach(var stat in PlayerStats)
+            {
+                s.AppendLine(stat.ToString());
+            }
+            return s.ToString();
+        }
     }
 
     public class PlayerStats
@@ -38,5 +48,10 @@ namespace Risk.Shared
         public int Armies { get; set; }
         public int Territories { get; set; }
         public int Score { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Name,-20} Strikes: {Strikes,3} Armies: {Armies,3} Territories: {Territories,3} Score: {Score,3}";
+        }
     }
 }

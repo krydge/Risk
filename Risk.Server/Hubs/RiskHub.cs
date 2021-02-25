@@ -29,41 +29,6 @@ namespace Risk.Server.Hubs
             this.game = game;
         }
 
-        private async void timeoutCallback(CancellationToken cancellationToken)
-        {
-            logger.LogInformation("timeoutCallback begins");
-            for (int i = 0; i < TimeoutInSeconds * 1_000; i += 100)
-            {
-                Thread.Sleep(100);
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    logger.LogInformation("Cancellation requested while sleeping - don't sleep any more!");
-                    break;
-                }
-                logger.LogInformation("Cancellation not requested...sleeping a bit more.");
-            }
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                logger.LogInformation("Cancellation requested, _NOT_ penalizing current player.");
-                return;
-            }
-
-            if(game.GameState == GameState.GameOver)
-            {
-                logger.LogInformation("The game is over, so it doesn't really matter that {currentPlayerName} timed out.", currentPlayer.Name);
-                return;
-            }
-
-            currentPlayer.Strikes++;
-            logger.LogInformation("Boo on you {0}, you took too long to {1}.  One more strike!  You now have {2} strike(s)!", currentPlayer.Name, game.GameState, currentPlayer.Strikes);
-            await Clients.Client(currentPlayer.Token).SendMessage("Server", $"You took too long to {game.GameState}, you now have {currentPlayer.Strikes} strike(s).");
-            if (game.GameState == GameState.Deploying)
-                await tellNextPlayerToDeploy();
-            else
-                await tellNextPlayerToAttack();
-        }
-
         public override async Task OnConnectedAsync()
         {
             logger.LogInformation(Context.ConnectionId);
@@ -170,7 +135,6 @@ namespace Risk.Server.Hubs
 
             if(Context.ConnectionId == currentPlayer.Token)
             {
-                cancellationTokenSource.Cancel();
                 if(currentPlayer.Strikes >= MaxFailedTries)
                 {
                     if(game.Players.Count() == 1)
@@ -210,8 +174,6 @@ namespace Risk.Server.Hubs
                         currentPlayer.Name, l, currentPlayer.Strikes);
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", "Did not deploy successfully");
                     await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
-
-                    startTimeoutCountdown();
                 }
             }
             else
@@ -246,8 +208,6 @@ namespace Risk.Server.Hubs
 
             game.CurrentPlayer = players[nextPlayerIndex];
             await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
-
-            startTimeoutCountdown();
         }
 
         private async Task StartAttackPhase()
@@ -307,8 +267,6 @@ namespace Risk.Server.Hubs
                             logger.LogError($"Invalid attack request! {currentPlayer.Name} from {attackingTerritory} to {defendingTerritory}.  You now have {currentPlayer.Strikes} strike(s)!");
                             await Clients.Client(currentPlayer.Token).SendMessage("Server", $"Invalid attack request: {attackResult.Message} :(  You now have {currentPlayer.Strikes} strike(s)!");
                             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
-
-                            startTimeoutCountdown();
                         }
                         else
                         {
@@ -389,25 +347,16 @@ namespace Risk.Server.Hubs
 
             game.CurrentPlayer = players[nextPlayerIndex];
             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
-            startTimeoutCountdown();
-        }
-
-        private void startTimeoutCountdown()
-        {
-            cancellationTokenSource = new CancellationTokenSource();
-            var token = cancellationTokenSource.Token;
-            ThreadPool.QueueUserWorkItem(token => timeoutCallback((CancellationToken)token), token);
         }
 
         private async Task sendGameOverAsync()
         {
             game.SetGameOver();
             var status = game.GetGameStatus();
-            logger.LogInformation("Game Over. {gameStatus}", status);
+            logger.LogInformation("Game Over.\n\n{gameStatus}", status);
             var winners = status.PlayerStats.Where(s => s.Score == status.PlayerStats.Max(s => s.Score)).Select(s => s.Name);
             await BroadCastMessageAsync($"Game Over - {string.Join(',', winners)} win{(winners.Count() > 1?"":"s")}!");
             await Clients.All.SendStatus(game.GetGameStatus());
         }
-
     }
 }
