@@ -15,6 +15,7 @@ namespace Risk.Signalr.ConsoleClient
         }
 
         public string MyPlayerName { get; set; }
+        public int StartingArmies { get; set; }
         private Random rng = new Random();
 
         public Location WhereDoYouWantToDeploy(IEnumerable<BoardTerritory> board)

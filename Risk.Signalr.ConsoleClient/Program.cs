@@ -56,6 +56,11 @@ namespace Risk.Signalr.ConsoleClient
                 await DeployAsync(deployLocation);
             });
 
+            hubConnection.On<GameStatus>(MessageTypes.SendStatus, status =>
+            {
+                playerLogic.StartingArmies = status.StartingArmies;
+            });
+
             hubConnection.On<IEnumerable<BoardTerritory>>(MessageTypes.YourTurnToAttack, async (board) =>
             {
                 try
@@ -78,6 +83,10 @@ namespace Risk.Signalr.ConsoleClient
                 if (config["useAlternate"] == "true")
                 {
                     playerLogic = new AlternateSampleLogic(validatedName);
+                }
+                else if(config["useAlternate"] == "jonathan")
+                {
+                    playerLogic = new JonathanLogic(validatedName);
                 }
                 else
                 {

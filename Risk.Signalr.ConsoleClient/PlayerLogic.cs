@@ -17,6 +17,8 @@ namespace Risk.Signalr.ConsoleClient
         }
 
         public string MyPlayerName { get; set; }
+        public int StartingArmies { get; set; }
+
         int turnNum = 0;
         Random rng = new Random();
         int sleepFrequency = 0;
