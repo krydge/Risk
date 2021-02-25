@@ -66,7 +66,15 @@
                     <th>Score</th>
                 </tr>
             </thead>
-            @foreach (var p in Status.PlayerStats.OrderByDescending(p => p.Score))
+            @if(Status.GameState == GameState.GameOver)
+            {
+                playerStats = Status.PlayerStats.OrderByDescending(p => p.Score);
+            }
+            else
+            {
+                playerStats = Status.PlayerStats;
+            }
+            @foreach (var p in playerStats)
             {
             <tr style="@($" background-color:{ColorGenerator.GetColor(p.Name)}")">
                 @if (currentPlayerName == p.Name && Status.GameState != GameState.GameOver)
@@ -123,7 +131,7 @@
 
 @code{
 
-
+    public IEnumerable<PlayerStats> playerStats;
     public GameStartOptions startOptions = new GameStartOptions()
     {
         Height = 10,
