@@ -55,6 +55,10 @@ namespace Risk.Server.Hubs
                 await Clients.Client(duplicatePlayer.Token).SendMessage("Server", $"There is already a player registered on your client named {duplicatePlayer.Name}");
                 (duplicatePlayer as Player).Strikes++;
             }
+            else if(game.GameState == GameState.Deploying || game.GameState == GameState.Attacking)
+            {
+                await Clients.Client(Context.ConnectionId).SendMessage("Server", "There's already a game in progress.  Disconnect then try again once the game has finished.");
+            }
             else
             {
                 int i = 1;
