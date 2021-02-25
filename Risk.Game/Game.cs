@@ -75,6 +75,10 @@ namespace Risk.Game
             {
                 playerDictionary[p.Token].Strikes = 0;
             }
+
+            while(startOptions.StartingArmiesPerPlayer % startOptions.ArmiesDeployedPerTurn != 0)
+                startOptions.StartingArmiesPerPlayer++;//round up to an even number
+
             inititializeGame(startOptions);
             StartGame();
         }
@@ -108,7 +112,7 @@ namespace Risk.Game
             if (territory.Owner == null)
             {
                 territory.Owner = GetPlayer(playerToken);
-                territory.Armies = 1;
+                territory.Armies = startOptions.ArmiesDeployedPerTurn;
                 placeResult = true;
             }
             else if (territory.Owner.Token != playerToken)
@@ -119,7 +123,7 @@ namespace Risk.Game
             {
                 if (GetPlayerRemainingArmies(playerToken) > 0)
                 {
-                    territory.Armies++;
+                    territory.Armies += startOptions.ArmiesDeployedPerTurn;
                     placeResult = true;
                 }
                 else

@@ -14,6 +14,7 @@ namespace Risk.Shared
         public int StartingArmies { get; set; }
         public GameState GameState { get; set; }
         public IEnumerable<BoardTerritory> Board { get; set; }
+        public string CurrentPlayer { get; set; }
 
         public GameStatus()
         {

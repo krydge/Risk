@@ -39,6 +39,10 @@
             <div class="Value3">
                 <input type="number" @bind="startOptions.StartingArmiesPerPlayer" />
             </div>
+            <div class="Label4">Armies Deployed Per Turn</div>
+            <div class="Value4">
+                <input type="number" @bind="startOptions.ArmiesDeployedPerTurn" />
+            </div>
         </div>
     }
     @if (Status == null || (Status.GameState != GameState.Deploying && Status.GameState != GameState.Attacking))
@@ -56,22 +60,27 @@
         <table cellpadding="2px, 10px">
             <thead>
                 <tr>
-                    <th>Player Name</th>
-                    <th>Strikes</th>
-                    <th>Territories</th>
+                    <th style="min-width: 200px;">Player</th>
+                    <th>Cells</th>
                     <th>Armies</th>
                     <th>Score</th>
                 </tr>
             </thead>
             @foreach (var p in Status.PlayerStats.OrderByDescending(p => p.Score))
             {
-                <tr style="@($" background-color:{ColorGenerator.GetColor(p.Name)}")">
+            <tr style="@($" background-color:{ColorGenerator.GetColor(p.Name)}")">
+                @if (currentPlayerName == p.Name)
+                {
+                    <td><strong>⭐ @p.Name.Substring(0, Math.Min(20, p.Name.Length)) ⭐</strong></td>
+                }
+                else
+                {
                     <td>@p.Name</td>
-                    <td style="text-align: right">@p.Strikes</td>
-                    <td style="text-align: right">@p.Territories</td>
-                    <td style="text-align: right">@p.Armies</td>
-                    <td style="text-align: right">@p.Score.ToString("n0")</td>
-                </tr>
+                }
+                <td style="text-align: right">@p.Territories</td>
+                <td style="text-align: right">@p.Armies</td>
+                <td style="text-align: right">@p.Score.ToString("n0")</td>
+            </tr>
             }
         </table>
     </div>
@@ -117,9 +126,10 @@
 
     public GameStartOptions startOptions = new GameStartOptions()
     {
-        Height = 12,
-        Width = 12,
-        StartingArmiesPerPlayer = 50
+        Height = 10,
+        Width = 10,
+        StartingArmiesPerPlayer = 250,
+        ArmiesDeployedPerTurn = 5
     };
     public string actionButtonText = "Start Game";
     public string ServerAddress { get; set; }
@@ -134,6 +144,7 @@
     private int MaxCol = 0;
     private bool savedSecretCode = false;
     private bool showLog = false;
+    private string currentPlayerName = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -182,6 +193,7 @@
             {
                 actionButtonText = "Start Game";
             }
+            currentPlayerName = status.CurrentPlayer;
             StateHasChanged();
         });
 

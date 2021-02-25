@@ -78,10 +78,17 @@ namespace Risk.Server.Hubs
             await Clients.All.SendMessage("Server", message);
         }
 
+        private GameStatus getStatus()
+        {
+            GameStatus status = game.GetGameStatus();
+            status.CurrentPlayer = currentPlayer.Name;
+            return status;
+        }
+
         public async Task GetStatus()
         {
-            await Clients.Client(Context.ConnectionId).SendMessage("Server", game.GameState.ToString());
-            await Clients.Client(Context.ConnectionId).SendStatus(game.GetGameStatus());
+            await Clients.Client(Context.ConnectionId).SendMessage("Server", game.GameState.ToString());            
+            await Clients.Client(Context.ConnectionId).SendStatus(getStatus());
         }
 
         public async Task RestartGame(string password, GameStartOptions startOptions)
@@ -97,7 +104,7 @@ namespace Risk.Server.Hubs
                 await BroadCastMessageAsync("Restarting game...");
                 game.RestartGame(startOptions);
                 await StartDeployPhase();
-                await Clients.All.SendStatus(game.GetGameStatus());
+                await Clients.All.SendStatus(getStatus());
             }
             else
             {
@@ -152,7 +159,7 @@ namespace Risk.Server.Hubs
 
                 if(game.TryPlaceArmy(Context.ConnectionId, l))
                 {
-                    await Clients.All.SendStatus(game.GetGameStatus());
+                    await Clients.All.SendStatus(getStatus());
                     await Clients.Client(Context.ConnectionId).SendMessage("Server", $"Successfully Deployed At {l.Row}, {l.Column}");
                     logger.LogInformation("{currentPlayer} deployed at {l}", currentPlayer, l);
 
@@ -255,7 +262,7 @@ namespace Risk.Server.Hubs
                             logger.LogInformation($"{currentPlayer.Name} wants to attack from {attackingTerritory} to {defendingTerritory}");
 
                             attackResult = game.TryAttack(currentPlayer.Token, attackingTerritory, defendingTerritory);
-                            await Clients.All.SendStatus(game.GetGameStatus());
+                            await Clients.All.SendStatus(getStatus());
                         }
                         catch (Exception ex)
                         {
@@ -352,11 +359,11 @@ namespace Risk.Server.Hubs
         private async Task sendGameOverAsync()
         {
             game.SetGameOver();
-            var status = game.GetGameStatus();
+            var status = getStatus();
             logger.LogInformation("Game Over.\n\n{gameStatus}", status);
             var winners = status.PlayerStats.Where(s => s.Score == status.PlayerStats.Max(s => s.Score)).Select(s => s.Name);
             await BroadCastMessageAsync($"Game Over - {string.Join(',', winners)} win{(winners.Count() > 1?"":"s")}!");
-            await Clients.All.SendStatus(game.GetGameStatus());
+            await Clients.All.SendStatus(getStatus());
         }
     }
 }
