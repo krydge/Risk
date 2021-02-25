@@ -69,7 +69,7 @@
             @foreach (var p in Status.PlayerStats.OrderByDescending(p => p.Score))
             {
             <tr style="@($" background-color:{ColorGenerator.GetColor(p.Name)}")">
-                @if (currentPlayerName == p.Name)
+                @if (currentPlayerName == p.Name && Status.GameState != GameState.GameOver)
                 {
                     <td><strong>⭐ @p.Name.Substring(0, Math.Min(20, p.Name.Length)) ⭐</strong></td>
                 }
