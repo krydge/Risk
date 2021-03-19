@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Risk.Game;
 using Microsoft.Extensions.Configuration;
 using Risk.Shared;
+using Akka.Actor;
 
 namespace Risk.Server.Hubs
 {
@@ -14,16 +15,14 @@ namespace Risk.Server.Hubs
     {
         private readonly ILogger<RiskHub> logger;
         private readonly IConfiguration config;
-        public const int MaxFailedTries = 5;
+        private readonly ActorSystem actorSystem;
 
-        private Player currentPlayer => (game.CurrentPlayer as Player);
 
-        private Risk.Game.Game game { get; set; }
-        public RiskHub(ILogger<RiskHub> logger, IConfiguration config, Game.Game game)
+        public RiskHub(ILogger<RiskHub> logger, IConfiguration config, ActorSystem actorSystem)
         {
             this.logger = logger;
             this.config = config;
-            this.game = game;
+            this.actorSystem = actorSystem;
         }
         public override async Task OnConnectedAsync()
         {
