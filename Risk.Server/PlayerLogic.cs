@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Risk.Shared;
 using System;
 using System.Collections.Generic;
@@ -16,10 +17,12 @@ namespace Risk.Server
         }
 
         public string MyPlayerName { get; set; }
+        public ILogger<PlayerLogic> Logger { get; }
 
         public Location WhereDoYouWantToDeploy(IEnumerable<BoardTerritory> board)
         {
             var myTerritory = board.FirstOrDefault(t => t.OwnerName == MyPlayerName) ?? board.Skip(board.Count() / 2).First(t => t.OwnerName == null);
+            Logger.LogDebug(myTerritory.ToString());
             return myTerritory.Location;
         }
 
@@ -29,6 +32,7 @@ namespace Risk.Server
             {
                 var myNeighbors = GetNeighbors(myTerritory, board);
                 var destination = myNeighbors.Where(t => t.OwnerName != MyPlayerName).OrderBy(t => t.Armies).FirstOrDefault();
+                Logger.LogDebug("attacking {destination.Location} from {myTeritory.Location}",destination.Location, myTerritory.Location);
                 if (destination != null)
                 {
                     return (myTerritory.Location, destination.Location);

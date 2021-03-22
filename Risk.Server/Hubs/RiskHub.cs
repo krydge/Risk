@@ -38,6 +38,7 @@ namespace Risk.Server.Hubs
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var player = game.RemovePlayerByToken(Context.ConnectionId);
+            logger.LogDebug($"Player {player.Name} disconnected.  Removed from game.");
             await BroadCastMessageAsync($"Player {player.Name} disconnected.  Removed from game.");
             await base.OnDisconnectedAsync(exception);
         }
@@ -49,14 +50,17 @@ namespace Risk.Server.Hubs
 
         public async Task Signup(string user)
         {
+            logger.LogDebug("signing up a player");
             var duplicatePlayer = game.Players.ToList().FirstOrDefault(player => player.Token == Context.ConnectionId);
             if(duplicatePlayer != null)
             {
+                logger.LogWarning("{user} is trying to use a duplicate name",user);
                 await Clients.Client(duplicatePlayer.Token).SendMessage("Server", $"There is already a player registered on your client named {duplicatePlayer.Name}");
                 (duplicatePlayer as Player).Strikes++;
             }
             else if(game.GameState == GameState.Deploying || game.GameState == GameState.Attacking)
             {
+                logger.LogWarning("game already started cant add another player");
                 await Clients.Client(Context.ConnectionId).SendMessage("Server", "There's already a game in progress.  Disconnect then try again once the game has finished.");
             }
             else
@@ -65,6 +69,7 @@ namespace Risk.Server.Hubs
                 var baseName = user;
                 while (game.Players.Any(p => p.Name == user))
                 {
+                    logger.LogInformation("succesful in creating a clinet connection");
                     user = string.Concat(baseName, i.ToString());
                     i++;
                 }
@@ -74,6 +79,7 @@ namespace Risk.Server.Hubs
                 await BroadCastMessageAsync(newPlayer.Name + " has joined the game");
                 await Clients.Client(newPlayer.Token).SendMessage("Server", "Welcome to the game " + newPlayer.Name);
                 await Clients.Client(newPlayer.Token).JoinConfirmation(newPlayer.Name);
+                logger.LogDebug("Server", "Welcome to the game " + newPlayer.Name);
             }
         }
 
@@ -86,6 +92,7 @@ namespace Risk.Server.Hubs
         {
             GameStatus status = game.GetGameStatus();
             status.CurrentPlayer = currentPlayer.Name;
+            logger.LogDebug(status.ToString());
             return status;
         }
 
@@ -127,13 +134,14 @@ namespace Risk.Server.Hubs
             else
             {
                 await Clients.Client(Context.ConnectionId).SendMessage("Server", "Incorrect password");
+                logger.LogWarning("Incorect password tried");
             }
         }
 
         private async Task StartDeployPhase()
         {
             game.CurrentPlayer = game.Players.First();
-
+            logger.LogDebug("starting deploy phase");
             await Clients.Client(currentPlayer.Token).YourTurnToDeploy(game.Board.SerializableTerritories);
         }
 
@@ -224,7 +232,7 @@ namespace Risk.Server.Hubs
         private async Task StartAttackPhase()
         {
             game.CurrentPlayer = game.Players.First();
-
+            logger.LogDebug("starting attack phase");
             await Clients.Client(currentPlayer.Token).YourTurnToAttack(game.Board.SerializableTerritories);
         }
 
@@ -324,8 +332,10 @@ namespace Risk.Server.Hubs
             if (game.GameState == GameState.GameOver)
                 return;
 
-            if (game.Players.Count() > 1 && game.GameState == GameState.Attacking && game.Players.Any(p => game.PlayerCanAttack(p)))
+            if (game.Players.Count() > 1 && game.GameState == GameState.Attacking && game.Players.Any(p => game.PlayerCanAttack(p))) {
                 await tellNextPlayerToAttack();
+                logger.LogDebug("Moving to next player");
+            }
             else
                 await sendGameOverAsync();
         }
