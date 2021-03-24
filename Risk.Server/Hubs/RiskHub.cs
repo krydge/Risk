@@ -38,6 +38,7 @@ namespace Risk.Server.Hubs
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var player = game.RemovePlayerByToken(Context.ConnectionId);
+            logger.LogDebug(player.ToString());
             logger.LogDebug($"Player {player.Name} disconnected.  Removed from game.");
             await BroadCastMessageAsync($"Player {player.Name} disconnected.  Removed from game.");
             await base.OnDisconnectedAsync(exception);
@@ -45,6 +46,7 @@ namespace Risk.Server.Hubs
 
         public async Task SendMessage(string user, string message)
         {
+            logger.LogDebug(user, message);
             await Clients.All.SendMessage(user, message);
         }
 
@@ -113,6 +115,7 @@ namespace Risk.Server.Hubs
                 }
 
                 await BroadCastMessageAsync("Restarting game...");
+                logger.LogInformation("Restarting the game");
                 game.RestartGame(startOptions);
                 await StartDeployPhase();
                 await Clients.All.SendStatus(getStatus());

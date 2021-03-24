@@ -32,12 +32,14 @@ namespace Risk.Server
             {
                 var myNeighbors = GetNeighbors(myTerritory, board);
                 var destination = myNeighbors.Where(t => t.OwnerName != MyPlayerName).OrderBy(t => t.Armies).FirstOrDefault();
-                Logger.LogDebug("attacking {destination.Location} from {myTeritory.Location}",destination.Location, myTerritory.Location);
+                
                 if (destination != null)
                 {
+                    Logger.LogDebug("attacking {destination.Location} from {myTeritory.Location}", destination.Location, myTerritory.Location);
                     return (myTerritory.Location, destination.Location);
                 }
             }
+            Logger.LogWarning("Unable to find place to attack");
             throw new Exception("Unable to find place to attack");
         }
 
